@@ -31,10 +31,10 @@ public class GraphicConveyor {
         resultZ = resultZ.normalize();
 
         float[][] matrixData = new float[][]{
-                {resultX.x, resultY.x, resultZ.x, 0},
-                {resultX.y, resultY.y, resultZ.y, 0},
-                {resultX.z, resultY.z, resultZ.z, 0},
-                {-resultX.dot(eye), -resultY.dot(eye), -resultZ.dot(eye), 1}
+                {resultX.x, resultX.y, resultX.z, -resultX.dot(eye)},
+                {resultY.x, resultY.y, resultY.z, -resultY.dot(eye)},
+                {resultZ.x, resultZ.y, resultZ.z, -resultZ.dot(eye)},
+                {0, 0, 0, 1}
         };
         return new Matrix4f(matrixData);
     }
@@ -46,11 +46,12 @@ public class GraphicConveyor {
             final float farPlane) {
         Matrix4f result = new Matrix4f();
         float tangentMinusOnDegree = (float) (1.0F / (Math.tan(fov * 0.5F)));
+        //Матрица проекции для векторов-столбцов (транспонированная)
         result.set(0, 0, tangentMinusOnDegree / aspectRatio);
         result.set(1, 1, tangentMinusOnDegree);
         result.set(2, 2, (farPlane + nearPlane) / (farPlane - nearPlane));
-        result.set(2, 3, 1.0F);
-        result.set(3, 2, 2 * (nearPlane * farPlane) / (nearPlane - farPlane));
+        result.set(3, 2, 1.0F);
+        result.set(2, 3, 2 * (nearPlane * farPlane) / (nearPlane - farPlane));
         return result;
     }
 
