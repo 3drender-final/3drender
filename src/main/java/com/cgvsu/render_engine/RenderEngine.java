@@ -3,6 +3,7 @@ package com.cgvsu.render_engine;
 import java.util.ArrayList;
 
 import com.cgvsu.math.Vector3f;
+import com.cgvsu.math.Matrix4f;
 import javafx.scene.canvas.GraphicsContext;
 import javax.vecmath.*;
 import com.cgvsu.model.Model;
@@ -17,11 +18,22 @@ public class RenderEngine {
             final int width,
             final int height)
     {
-        Matrix4f modelMatrix = rotateScaleTranslate();
-        Matrix4f viewMatrix = camera.getViewMatrix();
-        Matrix4f projectionMatrix = camera.getProjectionMatrix();
+        render(graphicsContext, camera, mesh, width, height, null);
+    }
 
-        Matrix4f modelViewProjectionMatrix = new Matrix4f(modelMatrix);
+    public static void render(
+            final GraphicsContext graphicsContext,
+            final Camera camera,
+            final Model mesh,
+            final int width,
+            final int height,
+            final Matrix4f modelMatrix)
+    {
+        javax.vecmath.Matrix4f vecmathModelMatrix = rotateScaleTranslate(modelMatrix);
+        javax.vecmath.Matrix4f viewMatrix = camera.getViewMatrix();
+        javax.vecmath.Matrix4f projectionMatrix = camera.getProjectionMatrix();
+
+        javax.vecmath.Matrix4f modelViewProjectionMatrix = new javax.vecmath.Matrix4f(vecmathModelMatrix);
         modelViewProjectionMatrix.mul(viewMatrix);
         modelViewProjectionMatrix.mul(projectionMatrix);
 

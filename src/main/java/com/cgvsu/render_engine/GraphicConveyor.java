@@ -12,6 +12,13 @@ public class GraphicConveyor {
         return new Matrix4f(matrix);
     }
 
+    public static Matrix4f rotateScaleTranslate(com.cgvsu.math.Matrix4f modelMatrix) {
+        if (modelMatrix == null) {
+            return rotateScaleTranslate();
+        }
+        return MatrixUtils.convertToVecmath(modelMatrix);
+    }
+
     public static Matrix4f lookAt(Vector3f eye, Vector3f target) {
         return lookAt(eye, target, new Vector3f(0F, 1.0F, 0F));
     }
