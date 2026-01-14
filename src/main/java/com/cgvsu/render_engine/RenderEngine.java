@@ -4,8 +4,8 @@ import java.util.ArrayList;
 
 import com.cgvsu.math.Vector3f;
 import com.cgvsu.math.Matrix4f;
+import com.cgvsu.math.Point2f;
 import javafx.scene.canvas.GraphicsContext;
-import javax.vecmath.*;
 import com.cgvsu.model.Model;
 import static com.cgvsu.render_engine.GraphicConveyor.*;
 
@@ -29,13 +29,11 @@ public class RenderEngine {
             final int height,
             final Matrix4f modelMatrix)
     {
-        javax.vecmath.Matrix4f vecmathModelMatrix = rotateScaleTranslate(modelMatrix);
-        javax.vecmath.Matrix4f viewMatrix = camera.getViewMatrix();
-        javax.vecmath.Matrix4f projectionMatrix = camera.getProjectionMatrix();
+        Matrix4f modelMatrixResult = rotateScaleTranslate(modelMatrix);
+        Matrix4f viewMatrix = camera.getViewMatrix();
+        Matrix4f projectionMatrix = camera.getProjectionMatrix();
 
-        javax.vecmath.Matrix4f modelViewProjectionMatrix = new javax.vecmath.Matrix4f(vecmathModelMatrix);
-        modelViewProjectionMatrix.mul(viewMatrix);
-        modelViewProjectionMatrix.mul(projectionMatrix);
+        Matrix4f modelViewProjectionMatrix = modelMatrixResult.multiply(viewMatrix).multiply(projectionMatrix);
 
         final int nPolygons = mesh.polygons.size();
         for (int polygonInd = 0; polygonInd < nPolygons; ++polygonInd) {
@@ -45,9 +43,7 @@ public class RenderEngine {
             for (int vertexInPolygonInd = 0; vertexInPolygonInd < nVerticesInPolygon; ++vertexInPolygonInd) {
                 Vector3f vertex = mesh.vertices.get(mesh.polygons.get(polygonInd).getVertexIndices().get(vertexInPolygonInd));
 
-                javax.vecmath.Vector3f vertexVecmath = new javax.vecmath.Vector3f(vertex.x, vertex.y, vertex.z);
-
-                Point2f resultPoint = vertexToPoint(multiplyMatrix4ByVector3(modelViewProjectionMatrix, vertexVecmath), width, height);
+                Point2f resultPoint = vertexToPoint(multiplyMatrix4ByVector3(modelViewProjectionMatrix, vertex), width, height);
                 resultPoints.add(resultPoint);
             }
 

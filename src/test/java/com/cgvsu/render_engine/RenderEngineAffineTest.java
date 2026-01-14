@@ -24,8 +24,8 @@ public class RenderEngineAffineTest {
         Canvas canvas = new Canvas(800, 600);
         GraphicsContext gc = canvas.getGraphicsContext2D();
         Camera camera = new Camera(
-                new javax.vecmath.Vector3f(0, 0, 100),
-                new javax.vecmath.Vector3f(0, 0, 0),
+                new Vector3f(0, 0, 100),
+                new Vector3f(0, 0, 0),
                 1.0f, 1.0f, 0.01f, 100f);
 
         Matrix4f identity = AffineTransformation.identity();
@@ -42,8 +42,8 @@ public class RenderEngineAffineTest {
         Canvas canvas = new Canvas(800, 600);
         GraphicsContext gc = canvas.getGraphicsContext2D();
         Camera camera = new Camera(
-                new javax.vecmath.Vector3f(0, 0, 100),
-                new javax.vecmath.Vector3f(0, 0, 0),
+                new Vector3f(0, 0, 100),
+                new Vector3f(0, 0, 0),
                 1.0f, 1.0f, 0.01f, 100f);
 
         Matrix4f scaleMatrix = scale(2f, 2f, 2f);
@@ -60,8 +60,8 @@ public class RenderEngineAffineTest {
         Canvas canvas = new Canvas(800, 600);
         GraphicsContext gc = canvas.getGraphicsContext2D();
         Camera camera = new Camera(
-                new javax.vecmath.Vector3f(0, 0, 100),
-                new javax.vecmath.Vector3f(0, 0, 0),
+                new Vector3f(0, 0, 100),
+                new Vector3f(0, 0, 0),
                 1.0f, 1.0f, 0.01f, 100f);
 
         Matrix4f translateMatrix = translate(5f, 5f, 5f);
@@ -78,8 +78,8 @@ public class RenderEngineAffineTest {
         Canvas canvas = new Canvas(800, 600);
         GraphicsContext gc = canvas.getGraphicsContext2D();
         Camera camera = new Camera(
-                new javax.vecmath.Vector3f(0, 0, 100),
-                new javax.vecmath.Vector3f(0, 0, 0),
+                new Vector3f(0, 0, 100),
+                new Vector3f(0, 0, 0),
                 1.0f, 1.0f, 0.01f, 100f);
 
         Matrix4f rotateMatrix = rotateZ((float) Math.PI / 2);
@@ -96,8 +96,8 @@ public class RenderEngineAffineTest {
         Canvas canvas = new Canvas(800, 600);
         GraphicsContext gc = canvas.getGraphicsContext2D();
         Camera camera = new Camera(
-                new javax.vecmath.Vector3f(0, 0, 100),
-                new javax.vecmath.Vector3f(0, 0, 0),
+                new Vector3f(0, 0, 100),
+                new Vector3f(0, 0, 0),
                 1.0f, 1.0f, 0.01f, 100f);
 
         Matrix4f scale = scale(2f, 2f, 2f);
@@ -117,8 +117,8 @@ public class RenderEngineAffineTest {
         Canvas canvas = new Canvas(800, 600);
         GraphicsContext gc = canvas.getGraphicsContext2D();
         Camera camera = new Camera(
-                new javax.vecmath.Vector3f(0, 0, 100),
-                new javax.vecmath.Vector3f(0, 0, 0),
+                new Vector3f(0, 0, 100),
+                new Vector3f(0, 0, 0),
                 1.0f, 1.0f, 0.01f, 100f);
 
         assertDoesNotThrow(() -> {

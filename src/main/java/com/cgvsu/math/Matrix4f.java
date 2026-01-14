@@ -1,75 +1,96 @@
 package com.cgvsu.math;
 
 public class Matrix4f {
-    private float[][] data;
+    private final float[][] matrix;
+    private static final float EPSILON = 1e-7f;
 
     public Matrix4f() {
-        this.data = new float[4][4];
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
-                data[i][j] = (i == j) ? 1.0f : 0.0f;
-            }
-        }
+        matrix = new float[4][4];
+        setIdentity();
     }
 
     public Matrix4f(float[][] data) {
         if (data == null || data.length != 4) {
             throw new IllegalArgumentException("Matrix data must be 4x4");
         }
+        this.matrix = new float[4][4];
         for (int i = 0; i < 4; i++) {
             if (data[i] == null || data[i].length != 4) {
                 throw new IllegalArgumentException("Matrix data must be 4x4");
             }
-        }
-        this.data = new float[4][4];
-        for (int i = 0; i < 4; i++) {
-            System.arraycopy(data[i], 0, this.data[i], 0, 4);
+            System.arraycopy(data[i], 0, matrix[i], 0, 4);
         }
     }
 
     public Matrix4f(Matrix4f other) {
-        this.data = new float[4][4];
+        this.matrix = new float[4][4];
         for (int i = 0; i < 4; i++) {
-            System.arraycopy(other.data[i], 0, this.data[i], 0, 4);
+            System.arraycopy(other.matrix[i], 0, matrix[i], 0, 4);
         }
     }
 
-    public float get(int row, int col) {
-        return data[row][col];
+    public void setIdentity() {
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                matrix[i][j] = (i == j) ? 1.0f : 0.0f;
+            }
+        }
     }
 
-    public void set(int row, int col, float value) {
-        data[row][col] = value;
+    public void setZero() {
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                matrix[i][j] = 0.0f;
+            }
+        }
+    }
+
+    public float get(int i, int j) {
+        return matrix[i][j];
+    }
+
+    public void set(int i, int j, float value) {
+        if (i < 0 || i >= 4 || j < 0 || j >= 4) {
+            throw new IndexOutOfBoundsException("Индексы должны быть в промежутке [0..3]");
+        }
+        this.matrix[i][j] = value;
     }
 
     public float[][] getData() {
         float[][] copy = new float[4][4];
         for (int i = 0; i < 4; i++) {
-            System.arraycopy(data[i], 0, copy[i], 0, 4);
+            System.arraycopy(matrix[i], 0, copy[i], 0, 4);
         }
         return copy;
     }
 
-    public Matrix4f multiply(Matrix4f other) {
+    public Matrix4f add(Matrix4f other) {
         Matrix4f result = new Matrix4f();
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
-                float sum = 0.0f;
-                for (int k = 0; k < 4; k++) {
-                    sum += this.data[i][k] * other.data[k][j];
-                }
-                result.data[i][j] = sum;
+                result.matrix[i][j] = matrix[i][j] + other.matrix[i][j];
+            }
+        }
+        return result;
+    }
+
+    public Matrix4f subtract(Matrix4f other) {
+        Matrix4f result = new Matrix4f();
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                result.matrix[i][j] = matrix[i][j] - other.matrix[i][j];
             }
         }
         return result;
     }
 
     public Vector4f multiplyVec(Vector4f vec) {
-        float x = data[0][0] * vec.x + data[0][1] * vec.y + data[0][2] * vec.z + data[0][3] * vec.w;
-        float y = data[1][0] * vec.x + data[1][1] * vec.y + data[1][2] * vec.z + data[1][3] * vec.w;
-        float z = data[2][0] * vec.x + data[2][1] * vec.y + data[2][2] * vec.z + data[2][3] * vec.w;
-        float w = data[3][0] * vec.x + data[3][1] * vec.y + data[3][2] * vec.z + data[3][3] * vec.w;
-        return new Vector4f(x, y, z, w);
+        return new Vector4f(
+                matrix[0][0] * vec.x + matrix[0][1] * vec.y + matrix[0][2] * vec.z + matrix[0][3] * vec.w,
+                matrix[1][0] * vec.x + matrix[1][1] * vec.y + matrix[1][2] * vec.z + matrix[1][3] * vec.w,
+                matrix[2][0] * vec.x + matrix[2][1] * vec.y + matrix[2][2] * vec.z + matrix[2][3] * vec.w,
+                matrix[3][0] * vec.x + matrix[3][1] * vec.y + matrix[3][2] * vec.z + matrix[3][3] * vec.w
+        );
     }
 
     public Vector3f multiplyVec(Vector3f vec) {
@@ -87,15 +108,41 @@ public class Matrix4f {
         return new Vector3f(result.x, result.y, result.z);
     }
 
+    public Matrix4f multiply(Matrix4f other) {
+        Matrix4f result = new Matrix4f();
+        result.setZero();
+
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                float sum = 0.0f;
+                for (int k = 0; k < 4; k++) {
+                    sum += this.matrix[i][k] * other.matrix[k][j];
+                }
+                result.matrix[i][j] = sum;
+            }
+        }
+        return result;
+    }
+
+    public Matrix4f transpose() {
+        Matrix4f result = new Matrix4f();
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                result.matrix[i][j] = matrix[j][i];
+            }
+        }
+        return result;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
-        Matrix4f matrix4f = (Matrix4f) obj;
-        final float EPS = 1e-6f;
+
+        Matrix4f other = (Matrix4f) obj;
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
-                if (Math.abs(data[i][j] - matrix4f.data[i][j]) > EPS) {
+                if (Math.abs(matrix[i][j] - other.matrix[i][j]) > EPSILON) {
                     return false;
                 }
             }
@@ -104,16 +151,26 @@ public class Matrix4f {
     }
 
     @Override
+    public int hashCode() {
+        int result = 1;
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                result = 31 * result + Float.floatToIntBits(matrix[i][j]);
+            }
+        }
+        return result;
+    }
+
+    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < 4; i++) {
             sb.append("[");
             for (int j = 0; j < 4; j++) {
-                sb.append(data[i][j]);
-                if (j < 3) sb.append(", ");
+                sb.append(String.format("%.2f", matrix[i][j]));
+                if (j < 3) sb.append(" ");
             }
-            sb.append("]");
-            if (i < 3) sb.append("\n");
+            sb.append("]\n");
         }
         return sb.toString();
     }
