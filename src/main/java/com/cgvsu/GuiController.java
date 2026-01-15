@@ -25,6 +25,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.Label;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ListView;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Separator;
@@ -213,6 +214,24 @@ public class GuiController {
         Path fileName = Path.of(file.getAbsolutePath());
 
         try {
+            // Проверка существования файла
+            if (!file.exists()) {
+                showError("Ошибка загрузки", "Файл не существует: " + file.getName());
+                return;
+            }
+            
+            // Проверка размера файла (предупреждение для очень больших файлов)
+            long fileSize = file.length();
+            if (fileSize > 50 * 1024 * 1024) { // 50 MB
+                Alert confirmAlert = new Alert(AlertType.CONFIRMATION);
+                confirmAlert.setTitle("Большой файл");
+                confirmAlert.setHeaderText("Файл очень большой");
+                confirmAlert.setContentText(String.format("Размер файла: %.2f MB. Загрузка может занять некоторое время. Продолжить?", fileSize / (1024.0 * 1024.0)));
+                if (confirmAlert.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.CANCEL) {
+                    return;
+                }
+            }
+            
             String fileContent = Files.readString(fileName);
             Model loadedModel = ObjReader.read(fileContent);
             
@@ -232,10 +251,21 @@ public class GuiController {
             resetTransformationFields();
             updateTransformationFields();
             updateSceneInfo();
+        } catch (java.nio.file.NoSuchFileException exception) {
+            showError("Ошибка загрузки", "Файл не найден: " + file.getName());
+        } catch (java.nio.file.AccessDeniedException exception) {
+            showError("Ошибка загрузки", "Нет доступа к файлу: " + file.getName() + "\nВозможно, файл открыт в другой программе.");
         } catch (IOException exception) {
-            showError("Ошибка загрузки модели", "Не удалось прочитать файл: " + exception.getMessage());
+            String errorMessage = exception.getMessage();
+            if (errorMessage != null && errorMessage.contains("Permission denied")) {
+                showError("Ошибка загрузки", "Нет доступа к файлу. Возможно, файл открыт в другой программе.");
+            } else {
+                showError("Ошибка загрузки модели", "Не удалось прочитать файл: " + (errorMessage != null ? errorMessage : "Неизвестная ошибка"));
+            }
         } catch (ObjReaderException exception) {
             showError("Ошибка парсинга модели", exception.getMessage());
+        } catch (IllegalArgumentException exception) {
+            showError("Ошибка загрузки", "Некорректные данные: " + exception.getMessage());
         } catch (Exception exception) {
             showError("Ошибка загрузки модели", "Неожиданная ошибка: " + exception.getMessage());
         }
@@ -260,9 +290,32 @@ public class GuiController {
         }
 
         try {
-            ObjWriter.write(current.getModel(), file.getAbsolutePath());
+            // Проверка модели перед сохранением
+            Model model = current.getModel();
+            if (model.vertices.isEmpty()) {
+                showError("Ошибка сохранения", "Модель не содержит вершин. Невозможно сохранить пустую модель.");
+                return;
+            }
+            if (model.polygons.isEmpty()) {
+                showError("Ошибка сохранения", "Модель не содержит полигонов. Невозможно сохранить модель без полигонов.");
+                return;
+            }
+            
+            ObjWriter.write(model, file.getAbsolutePath());
+            showSuccess("Модель сохранена", "Модель успешно сохранена в файл:\n" + file.getName());
+        } catch (IllegalArgumentException exception) {
+            showError("Ошибка сохранения", "Некорректные данные модели: " + exception.getMessage());
         } catch (IOException exception) {
-            showError("Ошибка сохранения модели", exception.getMessage());
+            String errorMessage = exception.getMessage();
+            if (errorMessage != null && errorMessage.contains("Permission denied")) {
+                showError("Ошибка сохранения", "Нет доступа к файлу. Возможно, файл открыт в другой программе или нет прав на запись.");
+            } else if (errorMessage != null && errorMessage.contains("No space")) {
+                showError("Ошибка сохранения", "Недостаточно места на диске для сохранения файла.");
+            } else {
+                showError("Ошибка сохранения", "Не удалось сохранить файл: " + (errorMessage != null ? errorMessage : "Неизвестная ошибка"));
+            }
+        } catch (Exception exception) {
+            showError("Ошибка сохранения", "Неожиданная ошибка при сохранении: " + exception.getMessage());
         }
     }
 
@@ -285,12 +338,31 @@ public class GuiController {
         }
 
         try {
-            Model transformedModel = copyModel(current.getModel());
+            Model originalModel = current.getModel();
+            if (originalModel.vertices.isEmpty() || originalModel.polygons.isEmpty()) {
+                showError("Ошибка сохранения", "Модель не содержит данных для сохранения.");
+                return;
+            }
+            
+            Model transformedModel = copyModel(originalModel);
             Matrix4f modelMatrix = ModelMatrixBuilder.build(current.getTransform());
             ModelTransformer.transformMatrix(transformedModel, modelMatrix);
+            
             ObjWriter.write(transformedModel, file.getAbsolutePath());
+            showSuccess("Модель сохранена", "Трансформированная модель успешно сохранена в файл:\n" + file.getName());
+        } catch (IllegalArgumentException exception) {
+            showError("Ошибка сохранения", "Ошибка при применении трансформаций: " + exception.getMessage());
         } catch (IOException exception) {
-            showError("Ошибка сохранения модели", exception.getMessage());
+            String errorMessage = exception.getMessage();
+            if (errorMessage != null && errorMessage.contains("Permission denied")) {
+                showError("Ошибка сохранения", "Нет доступа к файлу. Возможно, файл открыт в другой программе или нет прав на запись.");
+            } else if (errorMessage != null && errorMessage.contains("No space")) {
+                showError("Ошибка сохранения", "Недостаточно места на диске для сохранения файла.");
+            } else {
+                showError("Ошибка сохранения", "Не удалось сохранить файл: " + (errorMessage != null ? errorMessage : "Неизвестная ошибка"));
+            }
+        } catch (Exception exception) {
+            showError("Ошибка сохранения", "Неожиданная ошибка при сохранении: " + exception.getMessage());
         }
     }
 
@@ -303,17 +375,46 @@ public class GuiController {
         }
 
         try {
-            float scaleX = Float.parseFloat(scaleXField.getText());
-            float scaleY = Float.parseFloat(scaleYField.getText());
-            float scaleZ = Float.parseFloat(scaleZField.getText());
+            // Проверка на пустые поля
+            if (scaleXField.getText().trim().isEmpty() || scaleYField.getText().trim().isEmpty() || scaleZField.getText().trim().isEmpty() ||
+                rotateXField.getText().trim().isEmpty() || rotateYField.getText().trim().isEmpty() || rotateZField.getText().trim().isEmpty() ||
+                translateXField.getText().trim().isEmpty() || translateYField.getText().trim().isEmpty() || translateZField.getText().trim().isEmpty()) {
+                showError("Ошибка ввода", "Все поля должны быть заполнены. Пожалуйста, введите значения во все поля.");
+                return;
+            }
             
-            float rotateX = Float.parseFloat(rotateXField.getText());
-            float rotateY = Float.parseFloat(rotateYField.getText());
-            float rotateZ = Float.parseFloat(rotateZField.getText());
+            float scaleX = Float.parseFloat(scaleXField.getText().trim());
+            float scaleY = Float.parseFloat(scaleYField.getText().trim());
+            float scaleZ = Float.parseFloat(scaleZField.getText().trim());
             
-            float translateX = Float.parseFloat(translateXField.getText());
-            float translateY = Float.parseFloat(translateYField.getText());
-            float translateZ = Float.parseFloat(translateZField.getText());
+            // Проверка масштаба на валидность
+            if (scaleX <= 0 || scaleY <= 0 || scaleZ <= 0) {
+                showError("Ошибка ввода", "Масштаб должен быть больше нуля. Введенные значения: X=" + scaleX + ", Y=" + scaleY + ", Z=" + scaleZ);
+                return;
+            }
+            
+            float rotateX = Float.parseFloat(rotateXField.getText().trim());
+            float rotateY = Float.parseFloat(rotateYField.getText().trim());
+            float rotateZ = Float.parseFloat(rotateZField.getText().trim());
+            
+            float translateX = Float.parseFloat(translateXField.getText().trim());
+            float translateY = Float.parseFloat(translateYField.getText().trim());
+            float translateZ = Float.parseFloat(translateZField.getText().trim());
+
+            // Проверка на NaN и Infinity
+            if (Float.isNaN(scaleX) || Float.isNaN(scaleY) || Float.isNaN(scaleZ) ||
+                Float.isNaN(rotateX) || Float.isNaN(rotateY) || Float.isNaN(rotateZ) ||
+                Float.isNaN(translateX) || Float.isNaN(translateY) || Float.isNaN(translateZ)) {
+                showError("Ошибка ввода", "Введены некорректные значения (NaN). Пожалуйста, введите числовые значения.");
+                return;
+            }
+            
+            if (Float.isInfinite(scaleX) || Float.isInfinite(scaleY) || Float.isInfinite(scaleZ) ||
+                Float.isInfinite(rotateX) || Float.isInfinite(rotateY) || Float.isInfinite(rotateZ) ||
+                Float.isInfinite(translateX) || Float.isInfinite(translateY) || Float.isInfinite(translateZ)) {
+                showError("Ошибка ввода", "Введены некорректные значения (Infinity). Пожалуйста, введите конечные числовые значения.");
+                return;
+            }
 
             ModelTransform transform = current.getTransform();
             transform.setScale(new Vector3f(scaleX, scaleY, scaleZ));
@@ -322,7 +423,9 @@ public class GuiController {
             updateTransformationFields();
             updateSceneInfo();
         } catch (NumberFormatException exception) {
-            showError("Ошибка ввода", "Проверьте правильность введенных значений");
+            showError("Ошибка ввода", "Некорректный формат числа. Пожалуйста, введите числовые значения (например: 1.0, 0.5, -10).");
+        } catch (Exception exception) {
+            showError("Ошибка", "Неожиданная ошибка при применении трансформаций: " + exception.getMessage());
         }
     }
 
@@ -382,28 +485,62 @@ public class GuiController {
     }
 
     private Model copyModel(Model source) {
+        if (source == null) {
+            throw new IllegalArgumentException("Source model cannot be null");
+        }
+        
         Model copy = new Model();
-        for (Vector3f v : source.vertices) {
-            copy.vertices.add(new Vector3f(v));
+        if (source.vertices != null) {
+            for (Vector3f v : source.vertices) {
+                if (v != null) {
+                    copy.vertices.add(new Vector3f(v));
+                }
+            }
         }
-        for (com.cgvsu.math.Vector2f v : source.textureVertices) {
-            copy.textureVertices.add(new com.cgvsu.math.Vector2f(v));
+        if (source.textureVertices != null) {
+            for (com.cgvsu.math.Vector2f v : source.textureVertices) {
+                if (v != null) {
+                    copy.textureVertices.add(new com.cgvsu.math.Vector2f(v));
+                }
+            }
         }
-        for (Vector3f v : source.normals) {
-            copy.normals.add(new Vector3f(v));
+        if (source.normals != null) {
+            for (Vector3f v : source.normals) {
+                if (v != null) {
+                    copy.normals.add(new Vector3f(v));
+                }
+            }
         }
-        for (com.cgvsu.model.Polygon p : source.polygons) {
-            com.cgvsu.model.Polygon polyCopy = new com.cgvsu.model.Polygon();
-            polyCopy.setVertexIndices(new ArrayList<>(p.getVertexIndices()));
-            polyCopy.setTextureVertexIndices(new ArrayList<>(p.getTextureVertexIndices()));
-            polyCopy.setNormalIndices(new ArrayList<>(p.getNormalIndices()));
-            copy.polygons.add(polyCopy);
+        if (source.polygons != null) {
+            for (com.cgvsu.model.Polygon p : source.polygons) {
+                if (p != null) {
+                    com.cgvsu.model.Polygon polyCopy = new com.cgvsu.model.Polygon();
+                    if (p.getVertexIndices() != null) {
+                        polyCopy.setVertexIndices(new ArrayList<>(p.getVertexIndices()));
+                    }
+                    if (p.getTextureVertexIndices() != null) {
+                        polyCopy.setTextureVertexIndices(new ArrayList<>(p.getTextureVertexIndices()));
+                    }
+                    if (p.getNormalIndices() != null) {
+                        polyCopy.setNormalIndices(new ArrayList<>(p.getNormalIndices()));
+                    }
+                    copy.polygons.add(polyCopy);
+                }
+            }
         }
         return copy;
     }
 
     private void showError(String title, String message) {
         Alert alert = new Alert(AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+    
+    private void showSuccess(String title, String message) {
+        Alert alert = new Alert(AlertType.INFORMATION);
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(message);
