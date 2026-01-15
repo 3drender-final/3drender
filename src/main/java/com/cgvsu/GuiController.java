@@ -29,6 +29,7 @@ import com.cgvsu.math.Vector3f;
 import com.cgvsu.math.Matrix4f;
 import com.cgvsu.model.Model;
 import com.cgvsu.objreader.ObjReader;
+import com.cgvsu.objreader.ObjReaderException;
 import com.cgvsu.objwriter.ObjWriter;
 import com.cgvsu.render_engine.Camera;
 import com.cgvsu.render_engine.OrbitCameraController;
@@ -187,7 +188,11 @@ public class GuiController {
             currentModelMatrix = AffineTransformation.identity();
             resetTransformationFields();
         } catch (IOException exception) {
-            showError("Ошибка загрузки модели", exception.getMessage());
+            showError("Ошибка загрузки модели", "Не удалось прочитать файл: " + exception.getMessage());
+        } catch (ObjReaderException exception) {
+            showError("Ошибка парсинга модели", exception.getMessage());
+        } catch (Exception exception) {
+            showError("Ошибка загрузки модели", "Неожиданная ошибка: " + exception.getMessage());
         }
     }
 
