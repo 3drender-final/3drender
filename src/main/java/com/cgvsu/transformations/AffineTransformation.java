@@ -61,12 +61,12 @@ public class AffineTransformation {
     }
 
     public static Matrix4f translate(float tx, float ty, float tz) {
-        //матрица переноса для векторов-столбцов (перенос в последней строке)
+        //матрица переноса для row-major формата (перенос в последнем столбце)
         float[][] data = {
-                {1, 0, 0, 0},
-                {0, 1, 0, 0},
-                {0, 0, 1, 0},
-                {tx, ty, tz, 1}
+                {1, 0, 0, tx},
+                {0, 1, 0, ty},
+                {0, 0, 1, tz},
+                {0, 0, 0, 1}
         };
         return new Matrix4f(data);
     }

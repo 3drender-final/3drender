@@ -46,6 +46,7 @@ import com.cgvsu.model.ModelEditor;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.TextInputDialog;
+import javafx.scene.Scene;
 
 public class GuiController {
 
@@ -106,17 +107,36 @@ public class GuiController {
     private Timeline timeline;
     
     private Set<KeyCode> pressedKeys = new HashSet<>();
+    
+    private boolean isDarkTheme = false;
+    private static final String LIGHT_THEME = "/com/cgvsu/styles/light-theme.css";
+    private static final String DARK_THEME = "/com/cgvsu/styles/dark-theme.css";
 
     @FXML
     private void initialize() {
-        anchorPane.prefWidthProperty().addListener((ov, oldValue, newValue) -> canvas.setWidth(newValue.doubleValue()));
-        anchorPane.prefHeightProperty().addListener((ov, oldValue, newValue) -> canvas.setHeight(newValue.doubleValue()));
+        anchorPane.prefWidthProperty().addListener((ov, oldValue, newValue) -> {
+            if (newValue != null) {
+                canvas.setWidth(newValue.doubleValue());
+            }
+        });
+        anchorPane.prefHeightProperty().addListener((ov, oldValue, newValue) -> {
+            if (newValue != null) {
+                canvas.setHeight(newValue.doubleValue());
+            }
+        });
 
         cameraController = new OrbitCameraController(camera);
 
         setupMouseHandlers();
         setupKeyboardHandlers();
         setupSceneModelsUI();
+        
+        // Применяем тему после того, как scene будет установлена
+        canvas.sceneProperty().addListener((obs, oldScene, newScene) -> {
+            if (newScene != null && newScene.getStylesheets().isEmpty()) {
+                setupTheme();
+            }
+        });
 
         timeline = new Timeline();
         timeline.setCycleCount(Animation.INDEFINITE);
@@ -582,6 +602,34 @@ public class GuiController {
     @FXML
     public void handleCameraReset(ActionEvent actionEvent) {
         cameraController.reset();
+    }
+    
+    @FXML
+    private void handleToggleTheme() {
+        Scene scene = canvas.getScene();
+        if (scene == null) {
+            return;
+        }
+        
+        // Удаляем текущую тему
+        scene.getStylesheets().clear();
+        
+        // Применяем новую тему
+        if (isDarkTheme) {
+            scene.getStylesheets().add(getClass().getResource(LIGHT_THEME).toExternalForm());
+            isDarkTheme = false;
+        } else {
+            scene.getStylesheets().add(getClass().getResource(DARK_THEME).toExternalForm());
+            isDarkTheme = true;
+        }
+    }
+    
+    private void setupTheme() {
+        Scene scene = canvas.getScene();
+        if (scene != null && scene.getStylesheets().isEmpty()) {
+            // Применяем светлую тему по умолчанию
+            scene.getStylesheets().add(getClass().getResource(LIGHT_THEME).toExternalForm());
+        }
     }
     
     @FXML

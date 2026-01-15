@@ -18,7 +18,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.geometry.Insets?>
 
-<AnchorPane fx:id="anchorPane" xmlns:fx="http://javafx.com/fxml" fx:controller="com.cgvsu.GuiController">
+<AnchorPane fx:id="anchorPane" styleClass="anchor-pane" xmlns:fx="http://javafx.com/fxml" fx:controller="com.cgvsu.GuiController">
     <MenuBar>
         <Menu mnemonicParsing="false" text="File">
             <MenuItem mnemonicParsing="false" onAction="#onOpenModelMenuItemClick" text="Load Model">
@@ -82,76 +82,79 @@
             <MenuItem mnemonicParsing="false" onAction="#handleDeleteSelectedVertices" text="Delete Vertices..."/>
             <MenuItem mnemonicParsing="false" onAction="#handleDeleteSelectedPolygons" text="Delete Polygons..."/>
         </Menu>
+        <Menu mnemonicParsing="false" text="View">
+            <MenuItem mnemonicParsing="false" onAction="#handleToggleTheme" text="Toggle Theme"/>
+        </Menu>
     </MenuBar>
 
-    <VBox AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="35.0" spacing="10.0">
-        <Label text="Model Transformations" style="-fx-font-weight: bold;"/>
+    <Canvas fx:id="canvas" AnchorPane.topAnchor="30.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.bottomAnchor="0.0" pickOnBounds="false"/>
+
+    <VBox AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="35.0" spacing="10.0" styleClass="panel">
+        <Label text="Model Transformations" styleClass="label-title"/>
         
-        <Label text="Scale:"/>
+        <Label text="Scale:" styleClass="label"/>
         <HBox spacing="5.0">
-            <Label text="X:"/>
-            <TextField fx:id="scaleXField" prefWidth="60.0" text="1.0"/>
-            <Label text="Y:"/>
-            <TextField fx:id="scaleYField" prefWidth="60.0" text="1.0"/>
-            <Label text="Z:"/>
-            <TextField fx:id="scaleZField" prefWidth="60.0" text="1.0"/>
+            <Label text="X:" styleClass="label"/>
+            <TextField fx:id="scaleXField" prefWidth="60.0" text="1.0" styleClass="text-field"/>
+            <Label text="Y:" styleClass="label"/>
+            <TextField fx:id="scaleYField" prefWidth="60.0" text="1.0" styleClass="text-field"/>
+            <Label text="Z:" styleClass="label"/>
+            <TextField fx:id="scaleZField" prefWidth="60.0" text="1.0" styleClass="text-field"/>
         </HBox>
         
-        <Label text="Rotation (degrees):"/>
+        <Label text="Rotation (degrees):" styleClass="label"/>
         <HBox spacing="5.0">
-            <Label text="X:"/>
-            <TextField fx:id="rotateXField" prefWidth="60.0" text="0.0"/>
-            <Label text="Y:"/>
-            <TextField fx:id="rotateYField" prefWidth="60.0" text="0.0"/>
-            <Label text="Z:"/>
-            <TextField fx:id="rotateZField" prefWidth="60.0" text="0.0"/>
+            <Label text="X:" styleClass="label"/>
+            <TextField fx:id="rotateXField" prefWidth="60.0" text="0.0" styleClass="text-field"/>
+            <Label text="Y:" styleClass="label"/>
+            <TextField fx:id="rotateYField" prefWidth="60.0" text="0.0" styleClass="text-field"/>
+            <Label text="Z:" styleClass="label"/>
+            <TextField fx:id="rotateZField" prefWidth="60.0" text="0.0" styleClass="text-field"/>
         </HBox>
         
-        <Label text="Translation:"/>
+        <Label text="Translation:" styleClass="label"/>
         <HBox spacing="5.0">
-            <Label text="X:"/>
-            <TextField fx:id="translateXField" prefWidth="60.0" text="0.0"/>
-            <Label text="Y:"/>
-            <TextField fx:id="translateYField" prefWidth="60.0" text="0.0"/>
-            <Label text="Z:"/>
-            <TextField fx:id="translateZField" prefWidth="60.0" text="0.0"/>
+            <Label text="X:" styleClass="label"/>
+            <TextField fx:id="translateXField" prefWidth="60.0" text="0.0" styleClass="text-field"/>
+            <Label text="Y:" styleClass="label"/>
+            <TextField fx:id="translateYField" prefWidth="60.0" text="0.0" styleClass="text-field"/>
+            <Label text="Z:" styleClass="label"/>
+            <TextField fx:id="translateZField" prefWidth="60.0" text="0.0" styleClass="text-field"/>
         </HBox>
         
-        <Button text="Apply Transformations" onAction="#handleApplyTransformations"/>
-        <Button text="Reset" onAction="#handleResetTransformations"/>
+        <Button text="Apply Transformations" onAction="#handleApplyTransformations" styleClass="button"/>
+        <Button text="Reset" onAction="#handleResetTransformations" styleClass="button"/>
         
         <Separator style="-fx-padding: 10 0;"/>
         
         <Label text="Model Editing" style="-fx-font-weight: bold;"/>
         <HBox spacing="5.0">
-            <Button text="Delete Selected Vertices" onAction="#handleDeleteSelectedVertices" style="-fx-font-size: 10px;"/>
+            <Button text="Delete Selected Vertices" onAction="#handleDeleteSelectedVertices" styleClass="button" style="-fx-font-size: 10px;"/>
         </HBox>
         <HBox spacing="5.0">
-            <Button text="Delete Selected Polygons" onAction="#handleDeleteSelectedPolygons" style="-fx-font-size: 10px;"/>
+            <Button text="Delete Selected Polygons" onAction="#handleDeleteSelectedPolygons" styleClass="button" style="-fx-font-size: 10px;"/>
         </HBox>
     </VBox>
 
-    <VBox AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="35.0" spacing="10.0" style="-fx-padding: 12; -fx-background-color: #f8f9fa; -fx-border-color: #dee2e6; -fx-border-width: 1; -fx-border-radius: 4; -fx-background-radius: 4;" minWidth="210" prefWidth="210">
-        <Label text="Scene Models" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #495057; -fx-padding: 0 0 6 0;"/>
-        <ListView fx:id="modelsListView" prefHeight="100" style="-fx-border-color: #ced4da; -fx-border-radius: 2;"/>
+    <VBox AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="35.0" spacing="10.0" styleClass="panel" minWidth="210" prefWidth="210">
+        <Label text="Scene Models" styleClass="label-title" style="-fx-padding: 0 0 6 0;"/>
+        <ListView fx:id="modelsListView" prefHeight="100" styleClass="list-view"/>
         <HBox spacing="5" alignment="CENTER_LEFT" style="-fx-padding: 4 0;">
             <CheckBox fx:id="modelActiveCheckBox" text="Show in scene" style="-fx-font-size: 11px;"/>
         </HBox>
         
         <Separator style="-fx-padding: 6 0;"/>
         
-        <VBox spacing="4" style="-fx-padding: 6; -fx-background-color: #e9ecef; -fx-background-radius: 3;">
-            <Label text="Model Info" style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #495057;"/>
-            <Label fx:id="sceneModelInfoLabel" text="No model selected" wrapText="true" style="-fx-font-size: 10px; -fx-text-fill: #6c757d;"/>
+        <VBox spacing="4" styleClass="info-block">
+            <Label text="Model Info" styleClass="label-subtitle"/>
+            <Label fx:id="sceneModelInfoLabel" text="No model selected" wrapText="true" styleClass="label-info"/>
         </VBox>
         
-        <VBox spacing="3" style="-fx-padding: 6; -fx-background-color: #e9ecef; -fx-background-radius: 3;">
-            <Label text="Transform Values" style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #495057;"/>
-            <Label fx:id="scenePositionLabel" text="Position: —" style="-fx-font-size: 10px; -fx-text-fill: #495057;"/>
-            <Label fx:id="sceneRotationLabel" text="Rotation: —" style="-fx-font-size: 10px; -fx-text-fill: #495057;"/>
-            <Label fx:id="sceneScaleLabel" text="Scale: —" style="-fx-font-size: 10px; -fx-text-fill: #495057;"/>
+        <VBox spacing="3" styleClass="info-block">
+            <Label text="Transform Values" styleClass="label-subtitle"/>
+            <Label fx:id="scenePositionLabel" text="Position: —" styleClass="label-info"/>
+            <Label fx:id="sceneRotationLabel" text="Rotation: —" styleClass="label-info"/>
+            <Label fx:id="sceneScaleLabel" text="Scale: —" styleClass="label-info"/>
         </VBox>
     </VBox>
-
-    <Canvas fx:id="canvas" width="1600" height="870" AnchorPane.topAnchor="30.0"/>
 </AnchorPane>
