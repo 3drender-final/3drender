@@ -10,8 +10,13 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TitledPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.geometry.Insets?>
 
 <AnchorPane fx:id="anchorPane" xmlns:fx="http://javafx.com/fxml" fx:controller="com.cgvsu.GuiController">
     <MenuBar>
@@ -110,6 +115,28 @@
         
         <Button text="Apply Transformations" onAction="#handleApplyTransformations"/>
         <Button text="Reset" onAction="#handleResetTransformations"/>
+    </VBox>
+
+    <VBox AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="35.0" spacing="10.0" style="-fx-padding: 12; -fx-background-color: #f8f9fa; -fx-border-color: #dee2e6; -fx-border-width: 1; -fx-border-radius: 4; -fx-background-radius: 4;" minWidth="210" prefWidth="210">
+        <Label text="Scene Models" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #495057; -fx-padding: 0 0 6 0;"/>
+        <ListView fx:id="modelsListView" prefHeight="100" style="-fx-border-color: #ced4da; -fx-border-radius: 2;"/>
+        <HBox spacing="5" alignment="CENTER_LEFT" style="-fx-padding: 4 0;">
+            <CheckBox fx:id="modelActiveCheckBox" text="Show in scene" style="-fx-font-size: 11px;"/>
+        </HBox>
+        
+        <Separator style="-fx-padding: 6 0;"/>
+        
+        <VBox spacing="4" style="-fx-padding: 6; -fx-background-color: #e9ecef; -fx-background-radius: 3;">
+            <Label text="Model Info" style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #495057;"/>
+            <Label fx:id="sceneModelInfoLabel" text="No model selected" wrapText="true" style="-fx-font-size: 10px; -fx-text-fill: #6c757d;"/>
+        </VBox>
+        
+        <VBox spacing="3" style="-fx-padding: 6; -fx-background-color: #e9ecef; -fx-background-radius: 3;">
+            <Label text="Transform Values" style="-fx-font-size: 11px; -fx-font-weight: bold; -fx-text-fill: #495057;"/>
+            <Label fx:id="scenePositionLabel" text="Position: —" style="-fx-font-size: 10px; -fx-text-fill: #495057;"/>
+            <Label fx:id="sceneRotationLabel" text="Rotation: —" style="-fx-font-size: 10px; -fx-text-fill: #495057;"/>
+            <Label fx:id="sceneScaleLabel" text="Scale: —" style="-fx-font-size: 10px; -fx-text-fill: #495057;"/>
+        </VBox>
     </VBox>
 
     <Canvas fx:id="canvas" width="1600" height="870" AnchorPane.topAnchor="30.0"/>
