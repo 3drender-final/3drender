@@ -18,25 +18,11 @@ public class GraphicConveyor {
     }
 
     public static Matrix4f lookAt(Vector3f eye, Vector3f target) {
-        return lookAt(eye, target, new Vector3f(0F, 1.0F, 0F));
+        return CameraView.lookAt(eye, target);
     }
 
     public static Matrix4f lookAt(Vector3f eye, Vector3f target, Vector3f up) {
-        Vector3f resultZ = target.subtract(eye);
-        Vector3f resultX = up.cross(resultZ);
-        Vector3f resultY = resultZ.cross(resultX);
-
-        resultX = resultX.normalize();
-        resultY = resultY.normalize();
-        resultZ = resultZ.normalize();
-
-        float[][] matrixData = new float[][]{
-                {resultX.x, resultX.y, resultX.z, -resultX.dot(eye)},
-                {resultY.x, resultY.y, resultY.z, -resultY.dot(eye)},
-                {resultZ.x, resultZ.y, resultZ.z, -resultZ.dot(eye)},
-                {0, 0, 0, 1}
-        };
-        return new Matrix4f(matrixData);
+        return CameraView.lookAt(eye, target, up);
     }
 
     public static Matrix4f perspective(
@@ -44,15 +30,7 @@ public class GraphicConveyor {
             final float aspectRatio,
             final float nearPlane,
             final float farPlane) {
-        Matrix4f result = new Matrix4f();
-        float tangentMinusOnDegree = (float) (1.0F / (Math.tan(fov * 0.5F)));
-        //Матрица проекции для векторов-столбцов (транспонированная)
-        result.set(0, 0, tangentMinusOnDegree / aspectRatio);
-        result.set(1, 1, tangentMinusOnDegree);
-        result.set(2, 2, (farPlane + nearPlane) / (farPlane - nearPlane));
-        result.set(3, 2, 1.0F);
-        result.set(2, 3, 2 * (nearPlane * farPlane) / (nearPlane - farPlane));
-        return result;
+        return CameraProjection.perspective(fov, aspectRatio, nearPlane, farPlane);
     }
 
     public static Vector3f multiplyMatrix4ByVector3(final Matrix4f matrix, final Vector3f vertex) {

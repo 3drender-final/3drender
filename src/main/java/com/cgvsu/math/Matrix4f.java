@@ -45,6 +45,18 @@ public class Matrix4f {
         }
     }
 
+    public static Matrix4f identity() {
+        Matrix4f result = new Matrix4f();
+        result.setIdentity();
+        return result;
+    }
+
+    public static Matrix4f zero() {
+        Matrix4f result = new Matrix4f();
+        result.setZero();
+        return result;
+    }
+
     public float get(int i, int j) {
         return matrix[i][j];
     }

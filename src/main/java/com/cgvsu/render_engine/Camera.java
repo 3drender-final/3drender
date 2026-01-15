@@ -3,8 +3,22 @@ package com.cgvsu.render_engine;
 import com.cgvsu.math.Vector3f;
 import com.cgvsu.math.Matrix4f;
 
+/**
+ * Базовый класс камеры.
+ * Представляет камеру с позицией, целью и параметрами проекции.
+ */
 public class Camera {
 
+    /**
+     * Создает новую камеру.
+     * 
+     * @param position позиция камеры в мировом пространстве
+     * @param target точка, на которую смотрит камера
+     * @param fov поле зрения в радианах
+     * @param aspectRatio соотношение сторон (ширина / высота)
+     * @param nearPlane расстояние до ближней плоскости отсечения
+     * @param farPlane расстояние до дальней плоскости отсечения
+     */
     public Camera(
             final Vector3f position,
             final Vector3f target,
@@ -20,40 +34,69 @@ public class Camera {
         this.farPlane = farPlane;
     }
 
+    /**
+     * Устанавливает позицию камеры.
+     */
     public void setPosition(final Vector3f position) {
         this.position = new Vector3f(position);
     }
 
+    /**
+     * Устанавливает точку, на которую смотрит камера.
+     */
     public void setTarget(final Vector3f target) {
         this.target = new Vector3f(target);
     }
 
+    /**
+     * Устанавливает соотношение сторон.
+     */
     public void setAspectRatio(final float aspectRatio) {
         this.aspectRatio = aspectRatio;
     }
 
+    /**
+     * Получает позицию камеры (копию).
+     */
     public Vector3f getPosition() {
         return new Vector3f(position);
     }
 
+    /**
+     * Получает точку, на которую смотрит камера (копию).
+     */
     public Vector3f getTarget() {
         return new Vector3f(target);
     }
 
+    /**
+     * Перемещает позицию камеры на указанный вектор.
+     */
     public void movePosition(final Vector3f translation) {
         this.position = this.position.add(translation);
     }
 
+    /**
+     * Перемещает точку, на которую смотрит камера, на указанный вектор.
+     */
     public void moveTarget(final Vector3f translation) {
         this.target = this.target.add(translation);
     }
 
-    Matrix4f getViewMatrix() {
-        return GraphicConveyor.lookAt(position, target);
+    /**
+     * Получает матрицу вида (view matrix).
+     * Преобразует координаты из мирового пространства в пространство камеры.
+     */
+    public Matrix4f getViewMatrix() {
+        return CameraView.lookAt(position, target);
     }
 
-    Matrix4f getProjectionMatrix() {
-        return GraphicConveyor.perspective(fov, aspectRatio, nearPlane, farPlane);
+    /**
+     * Получает матрицу проекции (projection matrix).
+     * Преобразует координаты из пространства камеры в пространство экрана.
+     */
+    public Matrix4f getProjectionMatrix() {
+        return CameraProjection.perspective(fov, aspectRatio, nearPlane, farPlane);
     }
 
     private Vector3f position;
