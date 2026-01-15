@@ -42,8 +42,10 @@ import com.cgvsu.transformations.ModelTransformer;
 import com.cgvsu.transformations.ModelMatrixBuilder;
 import com.cgvsu.ui.SceneModel;
 import com.cgvsu.model.ModelTransform;
+import com.cgvsu.model.ModelEditor;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.control.TextInputDialog;
 
 public class GuiController {
 
@@ -580,6 +582,145 @@ public class GuiController {
     @FXML
     public void handleCameraReset(ActionEvent actionEvent) {
         cameraController.reset();
+    }
+    
+    @FXML
+    private void handleDeleteSelectedVertices() {
+        SceneModel current = getSelectedSceneModel();
+        if (current == null) {
+            showError("Нет модели", "Сначала выберите модель");
+            return;
+        }
+        
+        Model model = current.getModel();
+        if (model.vertices.isEmpty()) {
+            showError("Ошибка", "В модели нет вершин для удаления");
+            return;
+        }
+        
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("Удаление вершин");
+        dialog.setHeaderText("Введите индексы вершин для удаления");
+        dialog.setContentText("Индексы (через запятую, например: 0,1,2):");
+        
+        java.util.Optional<String> result = dialog.showAndWait();
+        if (result.isPresent() && !result.get().trim().isEmpty()) {
+            try {
+                ArrayList<Integer> indices = parseIndices(result.get(), model.vertices.size());
+                if (indices.isEmpty()) {
+                    showError("Ошибка", "Не указаны индексы для удаления");
+                    return;
+                }
+                
+                // Подтверждение удаления
+                Alert confirmAlert = new Alert(AlertType.CONFIRMATION);
+                confirmAlert.setTitle("Подтверждение удаления");
+                confirmAlert.setHeaderText("Удаление вершин");
+                confirmAlert.setContentText("Будет удалено " + indices.size() + " вершин(ы) и все связанные полигоны. Продолжить?");
+                
+                if (confirmAlert.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK) {
+                    ModelEditor.deleteVertices(model, indices);
+                    
+                    if (!ModelEditor.validateModel(model)) {
+                        showError("Ошибка", "После удаления модель стала некорректной. Возможно, удалено слишком много вершин.");
+                        return;
+                    }
+                    
+                    updateSceneInfo();
+                    showSuccess("Вершины удалены", "Удалено вершин: " + indices.size());
+                }
+            } catch (IllegalArgumentException exception) {
+                showError("Ошибка ввода", exception.getMessage());
+            } catch (Exception exception) {
+                showError("Ошибка", "Не удалось удалить вершины: " + exception.getMessage());
+            }
+        }
+    }
+    
+    @FXML
+    private void handleDeleteSelectedPolygons() {
+        SceneModel current = getSelectedSceneModel();
+        if (current == null) {
+            showError("Нет модели", "Сначала выберите модель");
+            return;
+        }
+        
+        Model model = current.getModel();
+        if (model.polygons.isEmpty()) {
+            showError("Ошибка", "В модели нет полигонов для удаления");
+            return;
+        }
+        
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("Удаление полигонов");
+        dialog.setHeaderText("Введите индексы полигонов для удаления");
+        dialog.setContentText("Индексы (через запятую, например: 0,1,2):");
+        
+        java.util.Optional<String> result = dialog.showAndWait();
+        if (result.isPresent() && !result.get().trim().isEmpty()) {
+            try {
+                ArrayList<Integer> indices = parseIndices(result.get(), model.polygons.size());
+                if (indices.isEmpty()) {
+                    showError("Ошибка", "Не указаны индексы для удаления");
+                    return;
+                }
+                
+                // Подтверждение удаления
+                Alert confirmAlert = new Alert(AlertType.CONFIRMATION);
+                confirmAlert.setTitle("Подтверждение удаления");
+                confirmAlert.setHeaderText("Удаление полигонов");
+                confirmAlert.setContentText("Будет удалено " + indices.size() + " полигон(ов). Продолжить?");
+                
+                if (confirmAlert.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK) {
+                    ModelEditor.deletePolygons(model, indices);
+                    
+                    if (!ModelEditor.validateModel(model)) {
+                        showError("Ошибка", "После удаления модель стала некорректной.");
+                        return;
+                    }
+                    
+                    updateSceneInfo();
+                    showSuccess("Полигоны удалены", "Удалено полигонов: " + indices.size());
+                }
+            } catch (IllegalArgumentException exception) {
+                showError("Ошибка ввода", exception.getMessage());
+            } catch (Exception exception) {
+                showError("Ошибка", "Не удалось удалить полигоны: " + exception.getMessage());
+            }
+        }
+    }
+    
+    /**
+     * Парсит строку с индексами, разделенными запятыми.
+     * 
+     * @param input строка с индексами (например: "0,1,2" или "0, 1, 2")
+     * @param maxIndex максимальный допустимый индекс
+     * @return список индексов
+     * @throws IllegalArgumentException если формат некорректен или индексы выходят за границы
+     */
+    private ArrayList<Integer> parseIndices(String input, int maxIndex) {
+        ArrayList<Integer> indices = new ArrayList<>();
+        
+        if (input == null || input.trim().isEmpty()) {
+            return indices;
+        }
+        
+        String[] parts = input.split(",");
+        for (String part : parts) {
+            try {
+                int index = Integer.parseInt(part.trim());
+                if (index < 0 || index >= maxIndex) {
+                    throw new IllegalArgumentException("Индекс " + index + " выходит за границы (максимум: " + (maxIndex - 1) + ")");
+                }
+                if (!indices.contains(index)) {
+                    indices.add(index);
+                }
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException("Некорректный формат индекса: " + part.trim());
+            }
+        }
+        
+        return indices;
     }
     
     private void setupSceneModelsUI() {

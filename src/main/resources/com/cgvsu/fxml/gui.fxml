@@ -78,6 +78,10 @@
         <Menu mnemonicParsing="false" text="Model Transformations">
             <MenuItem mnemonicParsing="false" onAction="#handleResetTransformations" text="Reset Transformations"/>
         </Menu>
+        <Menu mnemonicParsing="false" text="Edit Model">
+            <MenuItem mnemonicParsing="false" onAction="#handleDeleteSelectedVertices" text="Delete Vertices..."/>
+            <MenuItem mnemonicParsing="false" onAction="#handleDeleteSelectedPolygons" text="Delete Polygons..."/>
+        </Menu>
     </MenuBar>
 
     <VBox AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="35.0" spacing="10.0">
@@ -115,6 +119,16 @@
         
         <Button text="Apply Transformations" onAction="#handleApplyTransformations"/>
         <Button text="Reset" onAction="#handleResetTransformations"/>
+        
+        <Separator style="-fx-padding: 10 0;"/>
+        
+        <Label text="Model Editing" style="-fx-font-weight: bold;"/>
+        <HBox spacing="5.0">
+            <Button text="Delete Selected Vertices" onAction="#handleDeleteSelectedVertices" style="-fx-font-size: 10px;"/>
+        </HBox>
+        <HBox spacing="5.0">
+            <Button text="Delete Selected Polygons" onAction="#handleDeleteSelectedPolygons" style="-fx-font-size: 10px;"/>
+        </HBox>
     </VBox>
 
     <VBox AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="35.0" spacing="10.0" style="-fx-padding: 12; -fx-background-color: #f8f9fa; -fx-border-color: #dee2e6; -fx-border-width: 1; -fx-border-radius: 4; -fx-background-radius: 4;" minWidth="210" prefWidth="210">
