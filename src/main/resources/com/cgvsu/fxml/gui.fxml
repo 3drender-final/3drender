@@ -3,9 +3,15 @@
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.SeparatorMenuItem?>
 <?import javafx.scene.input.KeyCodeCombination?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.canvas.Canvas?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
 
 <AnchorPane fx:id="anchorPane" xmlns:fx="http://javafx.com/fxml" fx:controller="com.cgvsu.GuiController">
     <MenuBar>
@@ -13,6 +19,17 @@
             <MenuItem mnemonicParsing="false" onAction="#onOpenModelMenuItemClick" text="Load Model">
             <accelerator>
                 <KeyCodeCombination alt="UP" control="DOWN" meta="UP" shift="UP" shortcut="UP" code="F"/>
+            </accelerator>
+            </MenuItem>
+            <SeparatorMenuItem/>
+            <MenuItem mnemonicParsing="false" onAction="#onSaveModelMenuItemClick" text="Save Model (Original)">
+            <accelerator>
+                <KeyCodeCombination alt="UP" control="DOWN" meta="UP" shift="UP" shortcut="UP" code="S"/>
+            </accelerator>
+            </MenuItem>
+            <MenuItem mnemonicParsing="false" onAction="#onSaveTransformedModelMenuItemClick" text="Save Model (Transformed)">
+            <accelerator>
+                <KeyCodeCombination alt="UP" control="DOWN" meta="UP" shift="UP" shortcut="UP" code="T"/>
             </accelerator>
             </MenuItem>
         </Menu>
@@ -53,7 +70,47 @@
                 </accelerator>
             </MenuItem>
         </Menu>
+        <Menu mnemonicParsing="false" text="Model Transformations">
+            <MenuItem mnemonicParsing="false" onAction="#handleResetTransformations" text="Reset Transformations"/>
+        </Menu>
     </MenuBar>
+
+    <VBox AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="35.0" spacing="10.0">
+        <Label text="Model Transformations" style="-fx-font-weight: bold;"/>
+        
+        <Label text="Scale:"/>
+        <HBox spacing="5.0">
+            <Label text="X:"/>
+            <TextField fx:id="scaleXField" prefWidth="60.0" text="1.0"/>
+            <Label text="Y:"/>
+            <TextField fx:id="scaleYField" prefWidth="60.0" text="1.0"/>
+            <Label text="Z:"/>
+            <TextField fx:id="scaleZField" prefWidth="60.0" text="1.0"/>
+        </HBox>
+        
+        <Label text="Rotation (degrees):"/>
+        <HBox spacing="5.0">
+            <Label text="X:"/>
+            <TextField fx:id="rotateXField" prefWidth="60.0" text="0.0"/>
+            <Label text="Y:"/>
+            <TextField fx:id="rotateYField" prefWidth="60.0" text="0.0"/>
+            <Label text="Z:"/>
+            <TextField fx:id="rotateZField" prefWidth="60.0" text="0.0"/>
+        </HBox>
+        
+        <Label text="Translation:"/>
+        <HBox spacing="5.0">
+            <Label text="X:"/>
+            <TextField fx:id="translateXField" prefWidth="60.0" text="0.0"/>
+            <Label text="Y:"/>
+            <TextField fx:id="translateYField" prefWidth="60.0" text="0.0"/>
+            <Label text="Z:"/>
+            <TextField fx:id="translateZField" prefWidth="60.0" text="0.0"/>
+        </HBox>
+        
+        <Button text="Apply Transformations" onAction="#handleApplyTransformations"/>
+        <Button text="Reset" onAction="#handleResetTransformations"/>
+    </VBox>
 
     <Canvas fx:id="canvas" width="1600" height="870" AnchorPane.topAnchor="30.0"/>
 </AnchorPane>

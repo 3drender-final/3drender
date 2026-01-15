@@ -18,13 +18,22 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.io.IOException;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
+import javafx.scene.control.TextField;
+import javafx.scene.control.Label;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import com.cgvsu.math.Vector3f;
+import com.cgvsu.math.Matrix4f;
 import com.cgvsu.model.Model;
 import com.cgvsu.objreader.ObjReader;
+import com.cgvsu.objwriter.ObjWriter;
 import com.cgvsu.render_engine.Camera;
 import com.cgvsu.render_engine.OrbitCameraController;
+import com.cgvsu.transformations.AffineTransformation;
+import com.cgvsu.transformations.ModelTransformer;
 
 public class GuiController {
 
@@ -34,7 +43,28 @@ public class GuiController {
     @FXML
     private Canvas canvas;
 
+    @FXML
+    private TextField scaleXField;
+    @FXML
+    private TextField scaleYField;
+    @FXML
+    private TextField scaleZField;
+    @FXML
+    private TextField rotateXField;
+    @FXML
+    private TextField rotateYField;
+    @FXML
+    private TextField rotateZField;
+    @FXML
+    private TextField translateXField;
+    @FXML
+    private TextField translateYField;
+    @FXML
+    private TextField translateZField;
+
+    private Model originalMesh = null;
     private Model mesh = null;
+    private Matrix4f currentModelMatrix = null;
 
     private Camera camera = new Camera(
             new Vector3f(0, 0, 100),
@@ -70,7 +100,7 @@ public class GuiController {
             handleContinuousKeyInput();
 
             if (mesh != null) {
-                RenderEngine.render(canvas.getGraphicsContext2D(), camera, mesh, (int) width, (int) height);
+                RenderEngine.render(canvas.getGraphicsContext2D(), camera, mesh, (int) width, (int) height, currentModelMatrix);
             }
         });
 
@@ -152,11 +182,144 @@ public class GuiController {
 
         try {
             String fileContent = Files.readString(fileName);
-            mesh = ObjReader.read(fileContent);
-            // todo: обработка ошибок
+            originalMesh = ObjReader.read(fileContent);
+            mesh = copyModel(originalMesh);
+            currentModelMatrix = AffineTransformation.identity();
+            resetTransformationFields();
         } catch (IOException exception) {
-
+            showError("Ошибка загрузки модели", exception.getMessage());
         }
+    }
+
+    @FXML
+    private void onSaveModelMenuItemClick() {
+        if (originalMesh == null) {
+            showError("Нет модели", "Сначала загрузите модель");
+            return;
+        }
+
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Model (*.obj)", "*.obj"));
+        fileChooser.setTitle("Save Model (Original)");
+
+        File file = fileChooser.showSaveDialog((Stage) canvas.getScene().getWindow());
+        if (file == null) {
+            return;
+        }
+
+        try {
+            ObjWriter.write(originalMesh, file.getAbsolutePath());
+        } catch (IOException exception) {
+            showError("Ошибка сохранения модели", exception.getMessage());
+        }
+    }
+
+    @FXML
+    private void onSaveTransformedModelMenuItemClick() {
+        if (mesh == null) {
+            showError("Нет модели", "Сначала загрузите модель");
+            return;
+        }
+
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Model (*.obj)", "*.obj"));
+        fileChooser.setTitle("Save Model (Transformed)");
+
+        File file = fileChooser.showSaveDialog((Stage) canvas.getScene().getWindow());
+        if (file == null) {
+            return;
+        }
+
+        try {
+            Model transformedModel = copyModel(originalMesh);
+            if (currentModelMatrix != null) {
+                ModelTransformer.transformMatrix(transformedModel, currentModelMatrix);
+            }
+            ObjWriter.write(transformedModel, file.getAbsolutePath());
+        } catch (IOException exception) {
+            showError("Ошибка сохранения модели", exception.getMessage());
+        }
+    }
+
+    @FXML
+    private void handleApplyTransformations() {
+        if (mesh == null) {
+            showError("Нет модели", "Сначала загрузите модель");
+            return;
+        }
+
+        try {
+            float scaleX = Float.parseFloat(scaleXField.getText());
+            float scaleY = Float.parseFloat(scaleYField.getText());
+            float scaleZ = Float.parseFloat(scaleZField.getText());
+            
+            float rotateX = (float) Math.toRadians(Double.parseDouble(rotateXField.getText()));
+            float rotateY = (float) Math.toRadians(Double.parseDouble(rotateYField.getText()));
+            float rotateZ = (float) Math.toRadians(Double.parseDouble(rotateZField.getText()));
+            
+            float translateX = Float.parseFloat(translateXField.getText());
+            float translateY = Float.parseFloat(translateYField.getText());
+            float translateZ = Float.parseFloat(translateZField.getText());
+
+            Matrix4f scale = AffineTransformation.scale(scaleX, scaleY, scaleZ);
+            Matrix4f rotate = AffineTransformation.rotateX(rotateX)
+                    .multiply(AffineTransformation.rotateY(rotateY))
+                    .multiply(AffineTransformation.rotateZ(rotateZ));
+            Matrix4f translate = AffineTransformation.translate(translateX, translateY, translateZ);
+
+            currentModelMatrix = translate.multiply(rotate).multiply(scale);
+        } catch (NumberFormatException exception) {
+            showError("Ошибка ввода", "Проверьте правильность введенных значений");
+        }
+    }
+
+    @FXML
+    private void handleResetTransformations() {
+        currentModelMatrix = AffineTransformation.identity();
+        resetTransformationFields();
+    }
+
+    private void resetTransformationFields() {
+        if (scaleXField != null) {
+            scaleXField.setText("1.0");
+            scaleYField.setText("1.0");
+            scaleZField.setText("1.0");
+            rotateXField.setText("0.0");
+            rotateYField.setText("0.0");
+            rotateZField.setText("0.0");
+            translateXField.setText("0.0");
+            translateYField.setText("0.0");
+            translateZField.setText("0.0");
+        }
+    }
+
+    private Model copyModel(Model source) {
+        Model copy = new Model();
+        for (Vector3f v : source.vertices) {
+            copy.vertices.add(new Vector3f(v));
+        }
+        for (com.cgvsu.math.Vector2f v : source.textureVertices) {
+            copy.textureVertices.add(new com.cgvsu.math.Vector2f(v));
+        }
+        for (Vector3f v : source.normals) {
+            copy.normals.add(new Vector3f(v));
+        }
+        for (com.cgvsu.model.Polygon p : source.polygons) {
+            com.cgvsu.model.Polygon polyCopy = new com.cgvsu.model.Polygon();
+            polyCopy.setVertexIndices(new ArrayList<>(p.getVertexIndices()));
+            polyCopy.setTextureVertexIndices(new ArrayList<>(p.getTextureVertexIndices()));
+            polyCopy.setNormalIndices(new ArrayList<>(p.getNormalIndices()));
+            copy.polygons.add(polyCopy);
+        }
+        return copy;
+    }
+
+    private void showError(String title, String message) {
+        Alert alert = new Alert(AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 
     @FXML
