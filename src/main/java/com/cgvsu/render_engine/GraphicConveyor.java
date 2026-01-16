@@ -33,10 +33,6 @@ public class GraphicConveyor {
         return CameraProjection.perspective(fov, aspectRatio, nearPlane, farPlane);
     }
 
-    public static Vector3f multiplyMatrix4ByVector3(final Matrix4f matrix, final Vector3f vertex) {
-        return matrix.multiplyVec(vertex);
-    }
-
     public static Point2f vertexToPoint(final Vector3f vertex, final int width, final int height) {
         return new Point2f(vertex.x * width + width / 2.0F, -vertex.y * height + height / 2.0F);
     }
