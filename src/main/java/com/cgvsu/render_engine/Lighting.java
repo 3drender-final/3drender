@@ -1,0 +1,76 @@
+package com.cgvsu.render_engine;
+
+import com.cgvsu.math.Matrix4f;
+import com.cgvsu.math.Vector3f;
+import javafx.scene.paint.Color;
+
+public class Lighting {
+    private Vector3f lightDirection; // 4 usages
+    private final Color ambientColor; // 2 usages
+    private final Color diffuseColor; // 2 usages
+    private final float ambientIntensity; // 5 usages
+    private final float diffuseIntensity; // 5 usages
+
+    public Lighting(Vector3f cameraPosition, Vector3f cameraTarget, float ambientIntensity, float diffuseIntensity) {
+        this.lightDirection = new Vector3f(0.0f, 0.0f, -1.0f);
+        this.ambientIntensity = Math.max(0.0f, Math.min(1.0f, ambientIntensity));
+        this.diffuseIntensity = Math.max(0.0f, Math.min(1.0f, diffuseIntensity));
+
+        this.ambientColor = Color.WHITE;
+        this.diffuseColor = Color.WHITE;
+    }
+
+    public Lighting(Vector3f cameraPosition, Vector3f cameraTarget, Color ambientColor, Color diffuseColor,
+                    float ambientIntensity, float diffuseIntensity) {
+        this.lightDirection = new Vector3f(0.0f, 0.0f, -1.0f);
+        this.ambientIntensity = Math.max(0.0f, Math.min(1.0f, ambientIntensity));
+        this.diffuseIntensity = Math.max(0.0f, Math.min(1.0f, diffuseIntensity));
+
+        this.ambientColor = ambientColor;
+        this.diffuseColor = diffuseColor;
+    }
+
+    public void update(Vector3f cameraPosition, Vector3f cameraTarget, Matrix4f viewMatrix) {
+        this.lightDirection = new Vector3f(0.0f, 0.0f, -1.0f);
+    }
+
+    public float computeLightingIntensity(Vector3f normal, Vector3f vertexPosition, Vector3f cameraPosition) {
+
+        Vector3f ray = vertexPosition.subtract(cameraPosition).normalize();
+
+        Vector3f n = normal.normalize();
+        float l = -n.dot(ray);
+
+        if (l < 0.0f) {
+            l = 0.0f;
+        }
+
+        return Math.max(0.0f, Math.min(1.0f, l));
+    }
+
+
+    public Color shadeColor(Color baseColor, float intensity) {
+
+        double ambientR = baseColor.getRed() * ambientIntensity;
+        double ambientG = baseColor.getGreen() * ambientIntensity;
+        double ambientB = baseColor.getBlue() * ambientIntensity;
+
+        double diffuseR = baseColor.getRed() * diffuseIntensity * intensity;
+        double diffuseG = baseColor.getGreen() * diffuseIntensity * intensity;
+        double diffuseB = baseColor.getBlue() * diffuseIntensity * intensity;
+
+        double r = ambientR + diffuseR;
+        double g = ambientG + diffuseG;
+        double b = ambientB + diffuseB;
+
+        r = Math.max(0.0, Math.min(1.0, r));
+        g = Math.max(0.0, Math.min(1.0, g));
+        b = Math.max(0.0, Math.min(1.0, b));
+
+        return new Color(r, g, b, baseColor.getOpacity());
+    }
+
+    public Vector3f getLightDirection() { return lightDirection; }
+
+
+}
