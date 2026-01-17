@@ -1,6 +1,6 @@
 package com.cgvsu;
 
-import com.cgvsu.render_engine.RenderEngine;
+import com.cgvsu.render_engine.*;
 import javafx.fxml.FXML;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
@@ -8,6 +8,7 @@ import javafx.animation.Timeline;
 import javafx.event.ActionEvent;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.stage.FileChooser;
 import javafx.util.Duration;
@@ -35,8 +36,6 @@ import com.cgvsu.model.Model;
 import com.cgvsu.objreader.ObjReader;
 import com.cgvsu.objreader.ObjReaderException;
 import com.cgvsu.objwriter.ObjWriter;
-import com.cgvsu.render_engine.Camera;
-import com.cgvsu.render_engine.OrbitCameraController;
 import com.cgvsu.transformations.AffineTransformation;
 import com.cgvsu.transformations.ModelTransformer;
 import com.cgvsu.transformations.ModelMatrixBuilder;
@@ -154,7 +153,7 @@ public class GuiController {
             for (SceneModel sceneModel : sceneModels) {
                 if (sceneModel != null && sceneModel.isActive()) {
                     Matrix4f modelMatrix = ModelMatrixBuilder.build(sceneModel.getTransform());
-                    RenderEngine.render(canvas.getGraphicsContext2D(), camera, sceneModel.getModel(), (int) width, (int) height, modelMatrix);
+                    RenderEngine.render(canvas.getGraphicsContext2D(), camera, sceneModel.getModel(), (int) width, (int) height, null, null, Color.BLACK, null, new RenderingModes());
                 }
             }
         });
