@@ -78,7 +78,7 @@ public class ObjReader {
 		}
 	}
 
-	// Всем методам кроме основного я поставила модификатор доступа protected, чтобы обращаться к ним в тестах
+	// Всем методам кроме основного я поставил модификатор доступа protected, чтобы обращаться к ним в тестах
 	protected static Vector3f parseVertex(final ArrayList<String> wordsInLineWithoutToken, int lineInd) {
 		if (wordsInLineWithoutToken.isEmpty()) {
 			throw new ObjReaderException("Слишком мало аргументов для вершины.", lineInd);

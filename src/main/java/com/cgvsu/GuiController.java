@@ -344,6 +344,69 @@ public class GuiController {
         }
     }
 
+    private Model copyModel(Model source) {
+        if (source == null) {
+            throw new IllegalArgumentException("Source model cannot be null");
+        }
+        
+        Model copy = new Model();
+        if (source.vertices != null) {
+            for (Vector3f v : source.vertices) {
+                if (v != null) {
+                    copy.vertices.add(new Vector3f(v));
+                }
+            }
+        }
+        if (source.textureVertices != null) {
+            for (com.cgvsu.math.Vector2f v : source.textureVertices) {
+                if (v != null) {
+                    copy.textureVertices.add(new com.cgvsu.math.Vector2f(v));
+                }
+            }
+        }
+        if (source.normals != null) {
+            for (Vector3f v : source.normals) {
+                if (v != null) {
+                    copy.normals.add(new Vector3f(v));
+                }
+            }
+        }
+        if (source.polygons != null) {
+            for (com.cgvsu.model.Polygon p : source.polygons) {
+                if (p != null) {
+                    com.cgvsu.model.Polygon polyCopy = new com.cgvsu.model.Polygon();
+                    if (p.getVertexIndices() != null) {
+                        polyCopy.setVertexIndices(new ArrayList<>(p.getVertexIndices()));
+                    }
+                    if (p.getTextureVertexIndices() != null) {
+                        polyCopy.setTextureVertexIndices(new ArrayList<>(p.getTextureVertexIndices()));
+                    }
+                    if (p.getNormalIndices() != null) {
+                        polyCopy.setNormalIndices(new ArrayList<>(p.getNormalIndices()));
+                    }
+                    copy.polygons.add(polyCopy);
+                }
+            }
+        }
+        return copy;
+    }
+
+    private void showError(String title, String message) {
+        Alert alert = new Alert(AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+    
+    private void showSuccess(String title, String message) {
+        Alert alert = new Alert(AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
     @FXML
     private void onSaveTransformedModelMenuItemClick() {
         SceneModel current = getSelectedSceneModel();
