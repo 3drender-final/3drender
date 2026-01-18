@@ -31,7 +31,7 @@ public class RenderEngineAffineTest {
         Matrix4f identity = AffineTransformation.identity();
         
         assertDoesNotThrow(() -> {
-            RenderEngine.render(gc, camera, model, 800, 600, identity);
+            RenderEngine.renderWithMatrix(gc, camera, model, 800, 600, identity);
         }, "Рендеринг с единичной матрицей должен работать");
     }
 
@@ -49,7 +49,7 @@ public class RenderEngineAffineTest {
         Matrix4f scaleMatrix = scale(2f, 2f, 2f);
         
         assertDoesNotThrow(() -> {
-            RenderEngine.render(gc, camera, model, 800, 600, scaleMatrix);
+            RenderEngine.renderWithMatrix(gc, camera, model, 800, 600, scaleMatrix);
         }, "Рендеринг с масштабированием должен работать");
     }
 
@@ -67,7 +67,7 @@ public class RenderEngineAffineTest {
         Matrix4f translateMatrix = translate(5f, 5f, 5f);
         
         assertDoesNotThrow(() -> {
-            RenderEngine.render(gc, camera, model, 800, 600, translateMatrix);
+            RenderEngine.renderWithMatrix(gc, camera, model, 800, 600, translateMatrix);
         }, "Рендеринг с переносом должен работать");
     }
 
@@ -85,7 +85,7 @@ public class RenderEngineAffineTest {
         Matrix4f rotateMatrix = rotateZ((float) Math.PI / 2);
         
         assertDoesNotThrow(() -> {
-            RenderEngine.render(gc, camera, model, 800, 600, rotateMatrix);
+            RenderEngine.renderWithMatrix(gc, camera, model, 800, 600, rotateMatrix);
         }, "Рендеринг с поворотом должен работать");
     }
 
@@ -106,7 +106,7 @@ public class RenderEngineAffineTest {
         Matrix4f combined = translate.multiply(rotate).multiply(scale);
 
         assertDoesNotThrow(() -> {
-            RenderEngine.render(gc, camera, model, 800, 600, combined);
+            RenderEngine.renderWithMatrix(gc, camera, model, 800, 600, combined);
         }, "Комбинированные преобразования должны работать в конвейере");
     }
 

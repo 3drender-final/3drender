@@ -1,6 +1,6 @@
 package com.cgvsu;
 
-import com.cgvsu.render_engine.RenderEngine;
+import com.cgvsu.render_engine.*;
 import javafx.fxml.FXML;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
@@ -8,6 +8,7 @@ import javafx.animation.Timeline;
 import javafx.event.ActionEvent;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.stage.FileChooser;
 import javafx.util.Duration;
@@ -35,8 +36,6 @@ import com.cgvsu.model.Model;
 import com.cgvsu.objreader.ObjReader;
 import com.cgvsu.objreader.ObjReaderException;
 import com.cgvsu.objwriter.ObjWriter;
-import com.cgvsu.render_engine.Camera;
-import com.cgvsu.render_engine.OrbitCameraController;
 import com.cgvsu.transformations.AffineTransformation;
 import com.cgvsu.transformations.ModelTransformer;
 import com.cgvsu.transformations.ModelMatrixBuilder;
@@ -47,6 +46,8 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.Scene;
+
+import static com.cgvsu.render_engine.RenderEngine.shouldRender;
 
 public class GuiController {
 
@@ -130,7 +131,7 @@ public class GuiController {
         setupMouseHandlers();
         setupKeyboardHandlers();
         setupSceneModelsUI();
-        
+
         // Применяем тему после того, как scene будет установлена
         canvas.sceneProperty().addListener((obs, oldScene, newScene) -> {
             if (newScene != null && newScene.getStylesheets().isEmpty()) {
@@ -140,6 +141,7 @@ public class GuiController {
 
         timeline = new Timeline();
         timeline.setCycleCount(Animation.INDEFINITE);
+
 
         KeyFrame frame = new KeyFrame(Duration.millis(15), event -> {
             double width = canvas.getWidth();
@@ -152,9 +154,10 @@ public class GuiController {
 
             // Рендерим все активные модели
             for (SceneModel sceneModel : sceneModels) {
-                if (sceneModel != null && sceneModel.isActive()) {
+                if (sceneModel != null && sceneModel.isActive() && shouldRender()) {
+                    Model.preprocess(sceneModel.getModel());
                     Matrix4f modelMatrix = ModelMatrixBuilder.build(sceneModel.getTransform());
-                    RenderEngine.render(canvas.getGraphicsContext2D(), camera, sceneModel.getModel(), (int) width, (int) height, modelMatrix);
+                    RenderEngine.render(canvas.getGraphicsContext2D(), camera, sceneModel.getModel(), (int) width, (int) height, null, null, Color.GRAY, null, new RenderingModes());
                 }
             }
         });
@@ -339,6 +342,69 @@ public class GuiController {
         } catch (Exception exception) {
             showError("Ошибка сохранения", "Неожиданная ошибка при сохранении: " + exception.getMessage());
         }
+    }
+
+    private Model copyModel(Model source) {
+        if (source == null) {
+            throw new IllegalArgumentException("Source model cannot be null");
+        }
+        
+        Model copy = new Model();
+        if (source.vertices != null) {
+            for (Vector3f v : source.vertices) {
+                if (v != null) {
+                    copy.vertices.add(new Vector3f(v));
+                }
+            }
+        }
+        if (source.textureVertices != null) {
+            for (com.cgvsu.math.Vector2f v : source.textureVertices) {
+                if (v != null) {
+                    copy.textureVertices.add(new com.cgvsu.math.Vector2f(v));
+                }
+            }
+        }
+        if (source.normals != null) {
+            for (Vector3f v : source.normals) {
+                if (v != null) {
+                    copy.normals.add(new Vector3f(v));
+                }
+            }
+        }
+        if (source.polygons != null) {
+            for (com.cgvsu.model.Polygon p : source.polygons) {
+                if (p != null) {
+                    com.cgvsu.model.Polygon polyCopy = new com.cgvsu.model.Polygon();
+                    if (p.getVertexIndices() != null) {
+                        polyCopy.setVertexIndices(new ArrayList<>(p.getVertexIndices()));
+                    }
+                    if (p.getTextureVertexIndices() != null) {
+                        polyCopy.setTextureVertexIndices(new ArrayList<>(p.getTextureVertexIndices()));
+                    }
+                    if (p.getNormalIndices() != null) {
+                        polyCopy.setNormalIndices(new ArrayList<>(p.getNormalIndices()));
+                    }
+                    copy.polygons.add(polyCopy);
+                }
+            }
+        }
+        return copy;
+    }
+
+    private void showError(String title, String message) {
+        Alert alert = new Alert(AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+    
+    private void showSuccess(String title, String message) {
+        Alert alert = new Alert(AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 
     @FXML
