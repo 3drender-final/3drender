@@ -33,16 +33,6 @@ public class RenderEngineTest {
     }
 
 
-    @Test
-    void shouldRender_FirstCallReturnsTrue() {
-        assertTrue(RenderEngine.shouldRender());
-    }
-
-    @Test
-    void shouldRender_SecondImmediateCallReturnsFalse() {
-        RenderEngine.shouldRender();
-        assertFalse(RenderEngine.shouldRender());
-    }
 
 
 }

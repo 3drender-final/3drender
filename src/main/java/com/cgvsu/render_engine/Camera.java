@@ -34,6 +34,16 @@ public class Camera {
         this.farPlane = farPlane;
     }
 
+    public Camera copy() {
+        return new Camera(
+                new Vector3f(position.x, position.y, position.z),
+                new Vector3f(target.x, target.y, target.z),
+                fov,
+                aspectRatio,
+                nearPlane,
+                farPlane
+        );
+    }
     /**
      * Устанавливает позицию камеры.
      */
