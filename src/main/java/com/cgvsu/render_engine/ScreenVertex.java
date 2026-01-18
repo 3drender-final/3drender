@@ -7,7 +7,6 @@ public class ScreenVertex {
     private final float x;
     private final float y;
     private final float z;
-    // reciprocal of clip-space w (1 / w) for perspective-correct interpolation
     private final float invW;
     private final Vector2f textureCoords;
     private final Vector3f normal;
@@ -43,10 +42,6 @@ public class ScreenVertex {
         return z;
     }
 
-    /**
-     * Возвращает 1 / w из clip-space.
-     * Используется для перспективно корректной интерполяции атрибутов.
-     */
     public float getInvW() {
         return invW;
     }
