@@ -5,11 +5,11 @@ import com.cgvsu.math.Vector3f;
 import javafx.scene.paint.Color;
 
 public class Lighting {
-    private Vector3f lightDirection; // 4 usages
-    private final Color ambientColor; // 2 usages
-    private final Color diffuseColor; // 2 usages
-    private final float ambientIntensity; // 5 usages
-    private final float diffuseIntensity; // 5 usages
+    private Vector3f lightDirection;
+    private final Color ambientColor;
+    private final Color diffuseColor;
+    private final float ambientIntensity;
+    private final float diffuseIntensity;
 
     public Lighting(Vector3f cameraPosition, Vector3f cameraTarget, float ambientIntensity, float diffuseIntensity) {
         this.lightDirection = new Vector3f(0.0f, 0.0f, -1.0f);

@@ -13,148 +13,176 @@
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Separator?>
-<?import javafx.scene.control.TitledPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.geometry.Insets?>
 
-<AnchorPane fx:id="anchorPane" styleClass="anchor-pane" xmlns:fx="http://javafx.com/fxml" fx:controller="com.cgvsu.GuiController">
+<AnchorPane fx:id="anchorPane" xmlns:fx="http://javafx.com/fxml" fx:controller="com.cgvsu.GuiController">
     <MenuBar>
-        <Menu mnemonicParsing="false" text="File">
-            <MenuItem mnemonicParsing="false" onAction="#onOpenModelMenuItemClick" text="Load Model">
-            <accelerator>
-                <KeyCodeCombination alt="UP" control="DOWN" meta="UP" shift="UP" shortcut="UP" code="F"/>
-            </accelerator>
+        <Menu text="File">
+            <MenuItem onAction="#onOpenModelMenuItemClick" text="Load Model">
+                <accelerator>
+                    <KeyCodeCombination alt="UP" control="DOWN" meta="UP" shift="UP" shortcut="UP" code="F"/>
+                </accelerator>
             </MenuItem>
             <SeparatorMenuItem/>
-            <MenuItem mnemonicParsing="false" onAction="#onSaveModelMenuItemClick" text="Save Model (Original)">
-            <accelerator>
-                <KeyCodeCombination alt="UP" control="DOWN" meta="UP" shift="UP" shortcut="UP" code="S"/>
-            </accelerator>
+            <MenuItem onAction="#onSaveModelMenuItemClick" text="Save Model (Original)">
+                <accelerator>
+                    <KeyCodeCombination alt="UP" control="DOWN" meta="UP" shift="UP" shortcut="UP" code="S"/>
+                </accelerator>
             </MenuItem>
-            <MenuItem mnemonicParsing="false" onAction="#onSaveTransformedModelMenuItemClick" text="Save Model (Transformed)">
-            <accelerator>
-                <KeyCodeCombination alt="UP" control="DOWN" meta="UP" shift="UP" shortcut="UP" code="T"/>
-            </accelerator>
+            <MenuItem onAction="#onSaveTransformedModelMenuItemClick" text="Save Model (Transformed)">
+                <accelerator>
+                    <KeyCodeCombination alt="UP" control="DOWN" meta="UP" shift="UP" shortcut="UP" code="T"/>
+                </accelerator>
             </MenuItem>
+            <SeparatorMenuItem/>
+            <MenuItem onAction="#onLoadTextureMenuItemClick" text="Load Texture"/>
         </Menu>
-        <Menu mnemonicParsing="false" text="Camera Options">
-            <MenuItem mnemonicParsing="false" onAction="#handleCameraForward" text="Forward">
+        <Menu text="Camera Options">
+            <MenuItem onAction="#handleCameraForward" text="Forward">
                 <accelerator>
                     <KeyCodeCombination alt="UP" control="UP" meta="UP" shift="UP" shortcut="UP" code="UP"/>
                 </accelerator>
             </MenuItem>
-            <MenuItem mnemonicParsing="false" onAction="#handleCameraBackward" text="Backward">
+            <MenuItem onAction="#handleCameraBackward" text="Backward">
                 <accelerator>
                     <KeyCodeCombination alt="UP" control="UP" meta="UP" shift="UP" shortcut="UP" code="DOWN"/>
                 </accelerator>
             </MenuItem>
-            <MenuItem mnemonicParsing="false" onAction="#handleCameraLeft" text="Left">
+            <MenuItem onAction="#handleCameraLeft" text="Left">
                 <accelerator>
                     <KeyCodeCombination alt="UP" control="UP" meta="UP" shift="UP" shortcut="UP" code="LEFT"/>
                 </accelerator>
             </MenuItem>
-            <MenuItem mnemonicParsing="false" onAction="#handleCameraRight" text="Right">
+            <MenuItem onAction="#handleCameraRight" text="Right">
                 <accelerator>
                     <KeyCodeCombination alt="UP" control="UP" meta="UP" shift="UP" shortcut="UP" code="RIGHT"/>
                 </accelerator>
             </MenuItem>
-            <MenuItem mnemonicParsing="false" onAction="#handleCameraUp" text="Up">
+            <MenuItem onAction="#handleCameraUp" text="Up">
                 <accelerator>
                     <KeyCodeCombination alt="UP" control="UP" meta="UP" shift="UP" shortcut="UP" code="W"/>
                 </accelerator>
             </MenuItem>
-            <MenuItem mnemonicParsing="false" onAction="#handleCameraDown" text="Down">
+            <MenuItem onAction="#handleCameraDown" text="Down">
                 <accelerator>
                     <KeyCodeCombination alt="UP" control="UP" meta="UP" shift="UP" shortcut="UP" code="S"/>
                 </accelerator>
             </MenuItem>
-            <MenuItem mnemonicParsing="false" onAction="#handleCameraReset" text="Reset Camera">
+            <MenuItem onAction="#handleCameraReset" text="Reset Camera">
                 <accelerator>
                     <KeyCodeCombination alt="UP" control="UP" meta="UP" shift="UP" shortcut="UP" code="R"/>
                 </accelerator>
             </MenuItem>
+            <SeparatorMenuItem/>
         </Menu>
-        <Menu mnemonicParsing="false" text="Model Transformations">
-            <MenuItem mnemonicParsing="false" onAction="#handleResetTransformations" text="Reset Transformations"/>
+        <Menu text="Model Transformations">
+            <MenuItem onAction="#handleResetTransformations" text="Reset Transformations"/>
         </Menu>
-        <Menu mnemonicParsing="false" text="Edit Model">
-            <MenuItem mnemonicParsing="false" onAction="#handleDeleteSelectedVertices" text="Delete Vertices..."/>
-            <MenuItem mnemonicParsing="false" onAction="#handleDeleteSelectedPolygons" text="Delete Polygons..."/>
+        <Menu text="Edit Model">
+            <MenuItem onAction="#handleDeleteSelectedVertices" text="Delete Vertices..."/>
+            <MenuItem onAction="#handleDeleteSelectedPolygons" text="Delete Polygons..."/>
         </Menu>
-        <Menu mnemonicParsing="false" text="View">
-            <MenuItem mnemonicParsing="false" onAction="#handleToggleTheme" text="Toggle Theme"/>
+        <Menu text="View">
+            <MenuItem onAction="#handleToggleTheme" text="Toggle Theme"/>
         </Menu>
     </MenuBar>
 
-    <Canvas fx:id="canvas" AnchorPane.topAnchor="30.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.bottomAnchor="0.0" pickOnBounds="false"/>
+    <Canvas fx:id="canvas" AnchorPane.topAnchor="30.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.bottomAnchor="0.0"/>
 
-    <VBox AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="35.0" spacing="10.0" styleClass="panel">
-        <Label text="Model Transformations" styleClass="label-title"/>
-        
-        <Label text="Scale:" styleClass="label"/>
+    <VBox AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="35.0" spacing="8.0"
+          style="-fx-padding: 10; -fx-background-color: #f0f0f0; -fx-border-color: #ccc; -fx-border-radius: 5; -fx-background-radius: 5;">
+        <Label text="Model Transformations" style="-fx-font-weight: bold; -fx-font-size: 12px;"/>
+
+        <Label text="Scale:" style="-fx-font-size: 11px;"/>
         <HBox spacing="5.0">
-            <Label text="X:" styleClass="label"/>
-            <TextField fx:id="scaleXField" prefWidth="60.0" text="1.0" styleClass="text-field"/>
-            <Label text="Y:" styleClass="label"/>
-            <TextField fx:id="scaleYField" prefWidth="60.0" text="1.0" styleClass="text-field"/>
-            <Label text="Z:" styleClass="label"/>
-            <TextField fx:id="scaleZField" prefWidth="60.0" text="1.0" styleClass="text-field"/>
+            <Label text="X:" style="-fx-font-size: 11px;"/>
+            <TextField fx:id="scaleXField" prefWidth="60.0" text="1.0" style="-fx-font-size: 11px;"/>
+            <Label text="Y:" style="-fx-font-size: 11px;"/>
+            <TextField fx:id="scaleYField" prefWidth="60.0" text="1.0" style="-fx-font-size: 11px;"/>
+            <Label text="Z:" style="-fx-font-size: 11px;"/>
+            <TextField fx:id="scaleZField" prefWidth="60.0" text="1.0" style="-fx-font-size: 11px;"/>
         </HBox>
-        
-        <Label text="Rotation (degrees):" styleClass="label"/>
+
+        <Label text="Rotation (degrees):" style="-fx-font-size: 11px;"/>
         <HBox spacing="5.0">
-            <Label text="X:" styleClass="label"/>
-            <TextField fx:id="rotateXField" prefWidth="60.0" text="0.0" styleClass="text-field"/>
-            <Label text="Y:" styleClass="label"/>
-            <TextField fx:id="rotateYField" prefWidth="60.0" text="0.0" styleClass="text-field"/>
-            <Label text="Z:" styleClass="label"/>
-            <TextField fx:id="rotateZField" prefWidth="60.0" text="0.0" styleClass="text-field"/>
+            <Label text="X:" style="-fx-font-size: 11px;"/>
+            <TextField fx:id="rotateXField" prefWidth="60.0" text="0.0" style="-fx-font-size: 11px;"/>
+            <Label text="Y:" style="-fx-font-size: 11px;"/>
+            <TextField fx:id="rotateYField" prefWidth="60.0" text="0.0" style="-fx-font-size: 11px;"/>
+            <Label text="Z:" style="-fx-font-size: 11px;"/>
+            <TextField fx:id="rotateZField" prefWidth="60.0" text="0.0" style="-fx-font-size: 11px;"/>
         </HBox>
-        
-        <Label text="Translation:" styleClass="label"/>
+
+        <Label text="Translation:" style="-fx-font-size: 11px;"/>
         <HBox spacing="5.0">
-            <Label text="X:" styleClass="label"/>
-            <TextField fx:id="translateXField" prefWidth="60.0" text="0.0" styleClass="text-field"/>
-            <Label text="Y:" styleClass="label"/>
-            <TextField fx:id="translateYField" prefWidth="60.0" text="0.0" styleClass="text-field"/>
-            <Label text="Z:" styleClass="label"/>
-            <TextField fx:id="translateZField" prefWidth="60.0" text="0.0" styleClass="text-field"/>
+            <Label text="X:" style="-fx-font-size: 11px;"/>
+            <TextField fx:id="translateXField" prefWidth="60.0" text="0.0" style="-fx-font-size: 11px;"/>
+            <Label text="Y:" style="-fx-font-size: 11px;"/>
+            <TextField fx:id="translateYField" prefWidth="60.0" text="0.0" style="-fx-font-size: 11px;"/>
+            <Label text="Z:" style="-fx-font-size: 11px;"/>
+            <TextField fx:id="translateZField" prefWidth="60.0" text="0.0" style="-fx-font-size: 11px;"/>
         </HBox>
-        
-        <Button text="Apply Transformations" onAction="#handleApplyTransformations" styleClass="button"/>
-        <Button text="Reset" onAction="#handleResetTransformations" styleClass="button"/>
-        
-        <Separator style="-fx-padding: 10 0;"/>
-        
-        <Label text="Model Editing" style="-fx-font-weight: bold;"/>
+
         <HBox spacing="5.0">
-            <Button text="Delete Selected Vertices" onAction="#handleDeleteSelectedVertices" styleClass="button" style="-fx-font-size: 10px;"/>
+            <Button text="Apply" onAction="#handleApplyTransformations"
+                    style="-fx-font-size: 11px; -fx-pref-width: 80;"/>
+            <Button text="Reset" onAction="#handleResetTransformations"
+                    style="-fx-font-size: 11px; -fx-pref-width: 80;"/>
+        </HBox>
+
+        <Separator style="-fx-padding: 5 0;"/>
+
+        <Label text="Rendering Options" style="-fx-font-weight: bold; -fx-font-size: 12px;"/>
+        <VBox spacing="4">
+            <CheckBox fx:id="drawWireframeCheckBox" text="Draw Wireframe" style="-fx-font-size: 11px;"/>
+            <CheckBox fx:id="useTextureCheckBox" text="Use Texture" style="-fx-font-size: 11px;"/>
+            <CheckBox fx:id="useLightingCheckBox" text="Use Lighting" style="-fx-font-size: 11px;"/>
+        </VBox>
+
+        <Separator style="-fx-padding: 5 0;"/>
+
+        <Label text="Model Editing" style="-fx-font-weight: bold; -fx-font-size: 12px;"/>
+        <HBox spacing="5.0">
+            <Button text="Delete Vertices" onAction="#handleDeleteSelectedVertices"
+                    style="-fx-font-size: 10px; -fx-pref-width: 100;"/>
         </HBox>
         <HBox spacing="5.0">
-            <Button text="Delete Selected Polygons" onAction="#handleDeleteSelectedPolygons" styleClass="button" style="-fx-font-size: 10px;"/>
+            <Button text="Delete Polygons" onAction="#handleDeleteSelectedPolygons"
+                    style="-fx-font-size: 10px; -fx-pref-width: 100;"/>
         </HBox>
     </VBox>
 
-    <VBox AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="35.0" spacing="10.0" styleClass="panel" minWidth="210" prefWidth="210">
-        <Label text="Scene Models" styleClass="label-title" style="-fx-padding: 0 0 6 0;"/>
-        <ListView fx:id="modelsListView" prefHeight="100" styleClass="list-view"/>
+    <VBox AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="35.0" spacing="8.0"
+          style="-fx-padding: 10; -fx-background-color: #f0f0f0; -fx-border-color: #ccc; -fx-border-radius: 5; -fx-background-radius: 5;"
+          minWidth="210" prefWidth="210">
+        <Label text="Scene Models" style="-fx-font-weight: bold; -fx-font-size: 12px; -fx-padding: 0 0 4 0;"/>
+        <ListView fx:id="modelsListView" prefHeight="100" style="-fx-font-size: 11px;"/>
         <HBox spacing="5" alignment="CENTER_LEFT" style="-fx-padding: 4 0;">
             <CheckBox fx:id="modelActiveCheckBox" text="Show in scene" style="-fx-font-size: 11px;"/>
         </HBox>
-        
-        <Separator style="-fx-padding: 6 0;"/>
-        
-        <VBox spacing="4" styleClass="info-block">
-            <Label text="Model Info" styleClass="label-subtitle"/>
-            <Label fx:id="sceneModelInfoLabel" text="No model selected" wrapText="true" styleClass="label-info"/>
+
+        <Separator style="-fx-padding: 4 0;"/>
+
+        <VBox spacing="2">
+            <Label text="Model Info" style="-fx-font-weight: bold; -fx-font-size: 11px;"/>
+            <Label fx:id="sceneModelInfoLabel" text="No model selected" wrapText="true"
+                   style="-fx-font-size: 10px; -fx-text-fill: #666;"/>
         </VBox>
-        
-        <VBox spacing="3" styleClass="info-block">
-            <Label text="Transform Values" styleClass="label-subtitle"/>
-            <Label fx:id="scenePositionLabel" text="Position: —" styleClass="label-info"/>
-            <Label fx:id="sceneRotationLabel" text="Rotation: —" styleClass="label-info"/>
-            <Label fx:id="sceneScaleLabel" text="Scale: —" styleClass="label-info"/>
+
+        <VBox spacing="2">
+            <Label text="Transform Values" style="-fx-font-weight: bold; -fx-font-size: 11px;"/>
+            <Label fx:id="scenePositionLabel" text="Position: —" style="-fx-font-size: 10px; -fx-text-fill: #666;"/>
+            <Label fx:id="sceneRotationLabel" text="Rotation: —" style="-fx-font-size: 10px; -fx-text-fill: #666;"/>
+            <Label fx:id="sceneScaleLabel" text="Scale: —" style="-fx-font-size: 10px; -fx-text-fill: #666;"/>
+        </VBox>
+
+        <Separator style="-fx-padding: 4 0;"/>
+
+        <VBox spacing="2">
+            <Label text="Camera Info" style="-fx-font-weight: bold; -fx-font-size: 11px;"/>
+            <Label fx:id="sceneCameraLabel" text="Camera: 1/1" style="-fx-font-size: 10px; -fx-text-fill: #666;"/>
         </VBox>
     </VBox>
 </AnchorPane>

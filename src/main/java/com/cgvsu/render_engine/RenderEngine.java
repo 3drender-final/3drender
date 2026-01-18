@@ -5,14 +5,13 @@ import com.cgvsu.math.Vector2f;
 import com.cgvsu.math.Vector3f;
 import com.cgvsu.math.Vector4f;
 import com.cgvsu.model.Model;
-import com.cgvsu.model.ModelTransform;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
 import java.util.List;
 import java.util.ArrayList;
 
-// УДАЛЕНО: больше не используем rotateScaleTranslate, используем mesh.getModelMatrix()
+import static com.cgvsu.model.Model.preprocess;
 
 public class RenderEngine {
 
@@ -21,12 +20,26 @@ public class RenderEngine {
             final Camera camera,
             final Model mesh,
             final int width,
-            final int height,
-            Matrix4f matrix)
+            final int height)
     {
-        render(graphicsContext, camera, mesh, width, height, matrix);
+
+        render(graphicsContext, camera, mesh, width, height,
+                null, null, Color.LIGHTGRAY, new RenderingModes());
     }
 
+    public static void renderWithMatrix(
+            final GraphicsContext graphicsContext,
+            final Camera camera,
+            final Model mesh,
+            final int width,
+            final int height,
+            final Matrix4f matrix)
+    {
+        render(graphicsContext, camera, mesh, width, height,
+                null, null, Color.LIGHTGRAY, new RenderingModes(), matrix);
+    }
+
+    // Основной метод рендеринга с полным набором параметров (БЕЗ Matrix4f)
     public static void render(
             final GraphicsContext graphicsContext,
             final Camera camera,
@@ -36,14 +49,62 @@ public class RenderEngine {
             final Texture texture,
             final Lighting lighting,
             final Color baseColor,
+            final RenderingModes renderingModes)
+    {
+        Matrix4f modelMatrix = Matrix4f.identity();
+
+        // Вызываем внутренний метод рендеринга
+        render(graphicsContext, camera, mesh, width, height,
+                texture, lighting, baseColor, renderingModes, modelMatrix);
+    }
+
+    // Метод для рендеринга списка моделей (БЕЗ Matrix4f)
+    public static void render(
+            final GraphicsContext graphicsContext,
+            final Camera camera,
+            final List<Model> meshes,
+            final int width,
+            final int height,
+            final Texture texture,
+            final Lighting lighting,
+            final Color baseColor,
             final List<Camera> helperCameras,
             final RenderingModes renderingModes)
     {
 
-        // Используем матрицу модели из объекта mesh
+        // Для каждой модели вызываем рендеринг с единичной матрицей
         Matrix4f modelMatrix = Matrix4f.identity();
-        Matrix4f viewMatrix = camera.getViewMatrix(); // система координат камеры
-        Matrix4f projectionMatrix = camera.getProjectionMatrix(); // плоскость проецирования
+        for (Model mesh : meshes) {
+            if (mesh != null) {
+                render(graphicsContext, camera, mesh, width, height,
+                        texture, lighting, baseColor, renderingModes, modelMatrix);
+            }
+        }
+
+    }
+
+    // Фактический рендеринг с Matrix4f
+    public static void render(
+            final GraphicsContext graphicsContext,
+            final Camera camera,
+            final Model mesh,
+            final int width,
+            final int height,
+            final Texture texture,
+            final Lighting lighting,
+            final Color baseColor,
+            final RenderingModes renderingModes,
+            final Matrix4f modelMatrix)
+    {
+        preprocess(mesh);
+
+
+        // Проверяем renderingModes на null
+        final RenderingModes safeRenderingModes =
+                (renderingModes != null) ? renderingModes : new RenderingModes();
+
+        Matrix4f viewMatrix = camera.getViewMatrix();
+        Matrix4f projectionMatrix = camera.getProjectionMatrix();
 
         Matrix4f modelViewMatrix = viewMatrix.multiply(modelMatrix);
         Matrix4f modelViewProjectionMatrix = projectionMatrix.multiply(modelViewMatrix);
@@ -51,6 +112,11 @@ public class RenderEngine {
         ZBuffer zBuffer = new ZBuffer(width, height);
 
         Color wireColor = Color.BLACK;
+
+        // Проверяем, что модель не null и содержит полигоны
+        if (mesh == null || mesh.polygons == null || mesh.polygons.isEmpty()) {
+            return;
+        }
 
         final int nPolygons = mesh.polygons.size();
         for (int polygonInd = 0; polygonInd < nPolygons; ++polygonInd) {
@@ -61,11 +127,17 @@ public class RenderEngine {
                 continue;
             }
 
+            // Проверяем индексы вершин
+            if (vertexIndices.get(0) >= mesh.vertices.size() ||
+                    vertexIndices.get(1) >= mesh.vertices.size() ||
+                    vertexIndices.get(2) >= mesh.vertices.size()) {
+                continue;
+            }
+
             Vector3f v0World = mesh.vertices.get(vertexIndices.get(0));
             Vector3f v1World = mesh.vertices.get(vertexIndices.get(1));
             Vector3f v2World = mesh.vertices.get(vertexIndices.get(2));
 
-            // Прямое умножение матрицы на вектор (векторы-столбцы)
             Vector3f v0View = GraphicConveyor.multiplyMatrix4ByVector3(modelViewMatrix, v0World);
             Vector3f v1View = GraphicConveyor.multiplyMatrix4ByVector3(modelViewMatrix, v1World);
             Vector3f v2View = GraphicConveyor.multiplyMatrix4ByVector3(modelViewMatrix, v2World);
@@ -73,6 +145,11 @@ public class RenderEngine {
             Vector3f edge1 = v1View.subtract(v0View);
             Vector3f edge2 = v2View.subtract(v0View);
             Vector3f faceNormal = edge1.cross(edge2);
+
+            // Проверяем длину нормали (чтобы избежать деления на ноль)
+            if (faceNormal.length() < 1e-7f) {
+                continue;
+            }
 
             Vector3f toCamera = v0View.multiply(-1.0f);
             boolean frontFacing = faceNormal.dot(toCamera) > 0.0f;
@@ -87,18 +164,20 @@ public class RenderEngine {
             Vector3f cameraPosition = camera.getPosition();
 
             for (int vertexInPolygonInd = 0; vertexInPolygonInd < nVerticesInPolygon; ++vertexInPolygonInd) {
-                Vector3f modelVertex = mesh.vertices.get(vertexIndices.get(vertexInPolygonInd));
+                int vertexIndex = vertexIndices.get(vertexInPolygonInd);
+                if (vertexIndex >= mesh.vertices.size()) {
+                    continue;
+                }
 
-                // Прямое умножение матрицы на вектор (векторы-столбцы)
+                Vector3f modelVertex = mesh.vertices.get(vertexIndex);
+
                 Vector3f worldPosition = GraphicConveyor.multiplyMatrix4ByVector3(modelMatrix, modelVertex);
 
-                // Преобразование в clip-space (4D), далее делим на w, чтобы получить NDC
                 Vector4f clipPos = modelViewProjectionMatrix.multiplyVec(
                         new Vector4f(modelVertex.x, modelVertex.y, modelVertex.z, 1.0f));
                 float w = clipPos.w;
                 float invW = (Math.abs(w) > 1e-7f) ? (1.0f / w) : 1.0f;
 
-                // Нормализованный диапазон (NDC)
                 Vector3f transformed = new Vector3f(
                         clipPos.x * invW,
                         clipPos.y * invW,
@@ -106,16 +185,20 @@ public class RenderEngine {
                 );
 
                 Vector2f textureCoords = null;
-                if (hasTextureCoords && textureIndices.get(vertexInPolygonInd) < mesh.vertices.size()) {
-                    textureCoords = mesh.textureVertices.get(textureIndices.get(vertexInPolygonInd));
+                if (hasTextureCoords && vertexInPolygonInd < textureIndices.size()) {
+                    int texIndex = textureIndices.get(vertexInPolygonInd);
+                    if (texIndex >= 0 && texIndex < mesh.textureVertices.size()) {
+                        textureCoords = mesh.textureVertices.get(texIndex);
+                    }
                 }
 
                 Vector3f worldNormal = null;
-                if (hasNormals && normalIndices.get(vertexInPolygonInd) < mesh.normals.size()) {
-                    Vector3f modelNormal = mesh.normals.get(normalIndices.get(vertexInPolygonInd));
-                    // Для нормалей используем только rotation и scale (без translation)
-                    Matrix4f rotationScaleMatrix = Matrix4f.identity();
-                    worldNormal = GraphicConveyor.multiplyMatrix4ByVector3(rotationScaleMatrix, modelNormal).normalize();
+                if (hasNormals && vertexInPolygonInd < normalIndices.size()) {
+                    int normalIndex = normalIndices.get(vertexInPolygonInd);
+                    if (normalIndex >= 0 && normalIndex < mesh.normals.size()) {
+                        Vector3f modelNormal = mesh.normals.get(normalIndex);
+                        worldNormal = GraphicConveyor.multiplyMatrix4ByVector3(modelMatrix, modelNormal).normalize();
+                    }
                 }
 
                 ScreenVertex screenVertex = toScreenVertex(
@@ -131,84 +214,69 @@ public class RenderEngine {
                 screenVertices.add(screenVertex);
             }
 
-            // Отрисовка треугольников (заливка)
-            // Wireframe не влияет на заливку - это дополнительная обводка поверх заливки
-            for (int i = 1; i < nVerticesInPolygon - 1; ++i) {
+            // Если у нас недостаточно вершин для треугольника, пропускаем
+            if (screenVertices.size() < 3) {
+                continue;
+            }
+
+            // Отрисовка треугольников (триангуляция полигонов)
+            for (int i = 1; i < screenVertices.size() - 1; ++i) {
                 ScreenVertex sv0 = screenVertices.get(0);
                 ScreenVertex sv1 = screenVertices.get(i);
                 ScreenVertex sv2 = screenVertices.get(i + 1);
 
-                // Используем расширенную версию только если включены текстура ИЛИ освещение
-                if (renderingModes.isUseTexture() || renderingModes.isUseLighting()) {
-                    TriangleRasterization.fillTriangle(
-                            graphicsContext,
-                            zBuffer,
-                            sv0,
-                            sv1,
-                            sv2,
-                            width,
-                            height,
-                            renderingModes.isUseTexture() ? texture : null,
-                            renderingModes.isUseLighting() ? lighting : null,
-                            baseColor,
-                            cameraPosition
-                    );
-                } else {
-                    // Простая заливка базовым цветом
-                    TriangleRasterization.fillTriangle(
-                            graphicsContext,
-                            zBuffer,
-                            sv0,
-                            sv1,
-                            sv2,
-                            width,
-                            height,
-                            baseColor
-                    );
+                // Проверяем, что вершины валидны
+                if (sv0 == null || sv1 == null || sv2 == null) {
+                    continue;
                 }
+
+                TriangleRasterization.fillTriangle(
+                        graphicsContext,
+                        zBuffer,
+                        sv0,
+                        sv1,
+                        sv2,
+                        width,
+                        height,
+                        safeRenderingModes.isUseTexture() ? texture : null,
+                        safeRenderingModes.isUseLighting() ? lighting : null,
+                        baseColor,
+                        cameraPosition
+                );
             }
 
-            // Отрисовка полигональной сетки (если включена соответствующая галочка)
-            if (renderingModes.isDrawWireframe()) {
-                // Оценка коэффициента для depth bias в зависимости от угла поверхности к камере
+            // Отрисовка полигональной сетки
+            if (safeRenderingModes.isDrawWireframe()) {
                 Vector3f normalViewNorm = faceNormal.normalize();
                 Vector3f toCameraNorm = toCamera.normalize();
                 float cosTheta = Math.abs(normalViewNorm.dot(toCameraNorm));
-                // 0 — скользящий угол, 1 — фронтально к камере
                 float grazing = 1.0f - cosTheta;
 
-                // Нелинейно усиливаем bias только при реально скользящих углах,
-                // чтобы при небольших поворотах он оставался ближе к базовому.
                 double angleScale = 1.0 + 8.0 * Math.pow(grazing, 5.0);
-
-                // factorr = 1/(1 + k*d)
                 float distance = toCamera.length();
                 double depthFactor = 1.0 / (1.0 + 0.15 * distance);
-
                 double depthBiasScale = angleScale * depthFactor;
 
-                for (int i = 0; i < nVerticesInPolygon; ++i) {
+                for (int i = 0; i < screenVertices.size(); ++i) {
                     ScreenVertex a = screenVertices.get(i);
-                    ScreenVertex b = screenVertices.get((i + 1) % nVerticesInPolygon);
-                    LineRasterizer.drawLine(
-                            graphicsContext,
-                            zBuffer,
-                            a,
-                            b,
-                            width,
-                            height,
-                            wireColor,
-                            depthBiasScale
-                    );
+                    ScreenVertex b = screenVertices.get((i + 1) % screenVertices.size());
+                    if (a != null && b != null) {
+                        LineRasterizer.drawLine(
+                                graphicsContext,
+                                zBuffer,
+                                a,
+                                b,
+                                width,
+                                height,
+                                wireColor,
+                                depthBiasScale
+                        );
+                    }
                 }
             }
         }
 
-        renderHelperCameras(graphicsContext, helperCameras, camera, projectionMatrix.multiply(viewMatrix), width, height);
     }
-
-
-
 
     private static ScreenVertex toScreenVertex(
             final Vector3f vertex,
@@ -224,44 +292,10 @@ public class RenderEngine {
         float ndcY = vertex.y;
         float ndcZ = vertex.z;
 
-        // координаты на экране (NDC [-1..1] -> pixels [0..width-1] / [0..height-1])
         float screenX = (ndcX + 1.0f) * 0.5f * (width - 1.0f);
         float screenY = (1.0f - ndcY) * 0.5f * (height - 1.0f);
 
-        return new ScreenVertex(screenX, screenY, ndcZ, invW, textureCoords, worldNormal, worldPosition, lightingIntensity);
-    }
-
-
-    private static void renderHelperCameras(
-            final GraphicsContext graphicsContext,
-            final List<Camera> helperCameras,
-            final Camera activeCamera,
-            final Matrix4f viewProjectionMatrix,
-            final int width,
-            final int height) {
-        if (helperCameras == null || helperCameras.isEmpty()) {
-            return;
-        }
-
-        graphicsContext.setFill(Color.CORNFLOWERBLUE);
-        for (Camera helper : helperCameras) {
-            if (helper == activeCamera) {
-                continue;
-            }
-            Vector4f clip4 = viewProjectionMatrix.multiplyVec(
-                    new Vector4f(helper.getPosition().x, helper.getPosition().y, helper.getPosition().z, 1.0f)
-            );
-            float w = clip4.w;
-            // корректнее отсеивать только точки "за" камерой (w<=0),
-            // а не резать по ndcZ (диапазон глубины может отличаться)
-            if (w <= 1e-7f) {
-                continue;
-            }
-
-            Vector3f ndc = GraphicConveyor.multiplyMatrix4ByVector3(viewProjectionMatrix, helper.getPosition());
-            float screenX = (ndc.x + 1.0f) * 0.5f * (width - 1.0f);
-            float screenY = (1.0f - ndc.y) * 0.5f * (height - 1.0f);
-            graphicsContext.fillOval(screenX - 4, screenY - 4, 8, 8);
-        }
+        return new ScreenVertex(screenX, screenY, ndcZ, invW, textureCoords,
+                worldNormal, worldPosition, lightingIntensity);
     }
 }
