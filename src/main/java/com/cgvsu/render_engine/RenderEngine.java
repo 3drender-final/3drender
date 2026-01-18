@@ -15,6 +15,31 @@ import static com.cgvsu.model.Model.preprocess;
 
 public class RenderEngine {
 
+    private static final long MIN_RENDER_INTERVAL_MS = 16; // 1000ms / 60 = ~16ms
+    private static long lastRenderTime = 0;
+    private static final Object renderLock = new Object();
+
+    public static boolean shouldRender() {
+        synchronized (renderLock) {
+            long currentTime = System.currentTimeMillis();
+
+            if (lastRenderTime == 0) {
+                lastRenderTime = currentTime;
+                return true;
+            }
+
+            long timeSinceLastRender = currentTime - lastRenderTime;
+
+            if (timeSinceLastRender >= MIN_RENDER_INTERVAL_MS) {
+                lastRenderTime = currentTime;
+                return true;
+            }
+
+            return false;
+        }
+    }
+
+    // Упрощенная версия метода
     public static void render(
             final GraphicsContext graphicsContext,
             final Camera camera,
@@ -71,6 +96,10 @@ public class RenderEngine {
             final List<Camera> helperCameras,
             final RenderingModes renderingModes)
     {
+        // Проверяем FPS ограничение
+        if (shouldRender()) {
+            return;
+        }
 
         // Для каждой модели вызываем рендеринг с единичной матрицей
         Matrix4f modelMatrix = Matrix4f.identity();
