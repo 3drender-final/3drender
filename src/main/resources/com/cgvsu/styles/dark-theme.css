@@ -1,0 +1,147 @@
+/* Темная тема */
+.root {
+    -fx-background-color: #1a1a1a;
+    -fx-base: #2d2d2d;
+    -fx-control-inner-background: #2d2d2d;
+    -fx-text-base-color: #e0e0e0;
+}
+
+/* AnchorPane */
+.anchor-pane {
+    -fx-background-color: #1a1a1a;
+}
+
+/* Панели */
+.panel {
+    -fx-background-color: #2d2d2d;
+    -fx-border-color: #404040;
+    -fx-border-width: 1;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+    -fx-padding: 12;
+}
+
+/* Информационные блоки */
+.info-block {
+    -fx-background-color: #3a3a3a;
+    -fx-background-radius: 3;
+    -fx-padding: 6;
+}
+
+/* Кнопки */
+.button {
+    -fx-background-color: #0d6efd;
+    -fx-text-fill: white;
+    -fx-background-radius: 4;
+    -fx-padding: 6 12;
+}
+
+.button:hover {
+    -fx-background-color: #0b5ed7;
+}
+
+.button:pressed {
+    -fx-background-color: #0a58ca;
+}
+
+/* Поля ввода */
+.text-field {
+    -fx-background-color: #3a3a3a;
+    -fx-text-fill: #e0e0e0;
+    -fx-border-color: #555555;
+    -fx-border-radius: 3;
+    -fx-background-radius: 3;
+    -fx-padding: 4 8;
+}
+
+.text-field:focused {
+    -fx-border-color: #0d6efd;
+    -fx-border-width: 2;
+}
+
+/* ListView */
+.list-view {
+    -fx-background-color: #2d2d2d;
+    -fx-border-color: #555555;
+    -fx-border-radius: 2;
+}
+
+.list-cell {
+    -fx-background-color: #2d2d2d;
+    -fx-text-fill: #e0e0e0;
+}
+
+.list-cell:selected {
+    -fx-background-color: #0d6efd;
+    -fx-text-fill: white;
+}
+
+/* CheckBox */
+.check-box {
+    -fx-text-fill: #e0e0e0;
+}
+
+.check-box .box {
+    -fx-background-color: #3a3a3a;
+    -fx-border-color: #555555;
+}
+
+.check-box:selected .mark {
+    -fx-background-color: #0d6efd;
+}
+
+/* Метки */
+.label {
+    -fx-text-fill: #e0e0e0;
+}
+
+.label-title {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #e0e0e0;
+}
+
+.label-subtitle {
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #e0e0e0;
+}
+
+.label-info {
+    -fx-font-size: 10px;
+    -fx-text-fill: #b0b0b0;
+}
+
+/* Separator */
+.separator {
+    -fx-background-color: #404040;
+}
+
+/* MenuBar */
+.menu-bar {
+    -fx-background-color: #2d2d2d;
+    -fx-border-color: #404040;
+    -fx-border-width: 0 0 1 0;
+}
+
+.menu {
+    -fx-text-fill: #e0e0e0;
+}
+
+.menu:hover {
+    -fx-background-color: #3a3a3a;
+}
+
+.menu-item {
+    -fx-background-color: #2d2d2d;
+    -fx-text-fill: #e0e0e0;
+}
+
+.menu-item:hover {
+    -fx-background-color: #3a3a3a;
+}
+
+.menu-item:focused {
+    -fx-background-color: #0d6efd;
+    -fx-text-fill: white;
+}

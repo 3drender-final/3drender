@@ -1,0 +1,127 @@
+/* Светлая тема */
+.root {
+    -fx-background-color: #f5f5f5;
+    -fx-base: #ffffff;
+    -fx-control-inner-background: #ffffff;
+    -fx-text-base-color: #212529;
+}
+
+/* AnchorPane */
+.anchor-pane {
+    -fx-background-color: #f5f5f5;
+}
+
+/* Панели */
+.panel {
+    -fx-background-color: #f8f9fa;
+    -fx-border-color: #dee2e6;
+    -fx-border-width: 1;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+    -fx-padding: 12;
+}
+
+/* Информационные блоки */
+.info-block {
+    -fx-background-color: #e9ecef;
+    -fx-background-radius: 3;
+    -fx-padding: 6;
+}
+
+/* Кнопки */
+.button {
+    -fx-background-color: #007bff;
+    -fx-text-fill: white;
+    -fx-background-radius: 4;
+    -fx-padding: 6 12;
+}
+
+.button:hover {
+    -fx-background-color: #0056b3;
+}
+
+.button:pressed {
+    -fx-background-color: #004085;
+}
+
+/* Поля ввода */
+.text-field {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #ced4da;
+    -fx-border-radius: 3;
+    -fx-background-radius: 3;
+    -fx-padding: 4 8;
+}
+
+.text-field:focused {
+    -fx-border-color: #007bff;
+    -fx-border-width: 2;
+}
+
+/* ListView */
+.list-view {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #ced4da;
+    -fx-border-radius: 2;
+}
+
+/* CheckBox */
+.check-box {
+    -fx-text-fill: #495057;
+}
+
+/* Метки */
+.label {
+    -fx-text-fill: #495057;
+}
+
+.label-title {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #495057;
+}
+
+.label-subtitle {
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #495057;
+}
+
+.label-info {
+    -fx-font-size: 10px;
+    -fx-text-fill: #6c757d;
+}
+
+/* Separator */
+.separator {
+    -fx-background-color: #dee2e6;
+}
+
+/* MenuBar */
+.menu-bar {
+    -fx-background-color: #f8f9fa;
+    -fx-border-color: #dee2e6;
+    -fx-border-width: 0 0 1 0;
+}
+
+.menu {
+    -fx-text-fill: #495057;
+}
+
+.menu:hover {
+    -fx-background-color: #e9ecef;
+}
+
+.menu-item {
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #495057;
+}
+
+.menu-item:hover {
+    -fx-background-color: #f8f9fa;
+}
+
+.menu-item:focused {
+    -fx-background-color: #007bff;
+    -fx-text-fill: white;
+}

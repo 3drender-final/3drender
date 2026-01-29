@@ -16,6 +16,11 @@ public class Simple3DViewer extends Application {
         AnchorPane viewport = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("fxml/gui.fxml")));
 
         Scene scene = new Scene(viewport);
+        
+        // Загружаем светлую тему по умолчанию
+        String lightTheme = getClass().getResource("styles/light-theme.css").toExternalForm();
+        scene.getStylesheets().add(lightTheme);
+        
         stage.setMinWidth(1600);
         stage.setMinHeight(900);
         viewport.prefWidthProperty().bind(scene.widthProperty());
